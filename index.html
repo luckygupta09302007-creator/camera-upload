@@ -3,746 +3,612 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Camera Studio</title>
+<title>Camera Studio Pro</title>
 <style>
-*{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-}
-html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:#000;
-  color:#fff;
-  font-family:Arial,Helvetica,sans-serif;
-}
-.app{
-  position:relative;
-  width:100%;
-  height:100dvh;
-  background:#000;
-  overflow:hidden;
-}
-#camera{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  background:#000;
-}
-.mirror{
-  transform:scaleX(-1);
-}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
 
-/* PERMISSION OVERLAY */
-.perm-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.95);
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  z-index:9999;
-  text-align:center;
-  padding:30px;
-  gap:20px;
-}
-.perm-overlay.hidden{
-  display:none;
-}
-.perm-icon{
-  font-size:60px;
-}
-.perm-title{
-  font-size:22px;
-  font-weight:bold;
-}
-.perm-desc{
-  font-size:14px;
-  color:#94a3b8;
-  line-height:1.6;
-  max-width:300px;
-}
-.perm-btn{
-  padding:16px 40px;
-  font-size:17px;
-  font-weight:bold;
-  border:none;
-  border-radius:14px;
-  cursor:pointer;
-  transition:0.2s;
-}
-.perm-allow{
-  background:#22c55e;
-  color:white;
-}
-.perm-allow:active{
-  transform:scale(0.96);
-  background:#16a34a;
-}
+/* APP */
+.app{position:relative;width:100%;height:100dvh;background:#000;overflow:hidden}
+#camera{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
+.mirror{transform:scaleX(-1)}
 
-/* TOP */
-.top{
-  position:absolute;
-  top:0;left:0;right:0;
-  z-index:10;
-  padding:max(18px,env(safe-area-inset-top)) 18px 25px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:linear-gradient(to bottom,rgba(0,0,0,.7),transparent);
-}
-.top-group{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-.icon{
-  width:44px;height:44px;
-  border:0;border-radius:50%;
-  color:#fff;
-  background:rgba(0,0,0,.4);
-  backdrop-filter:blur(10px);
-  font-size:20px;cursor:pointer;
-}
-.icon:active{
-  transform:scale(.9);
-}
-.status{
-  padding:8px 13px;
-  border-radius:20px;
-  font-size:12px;font-weight:bold;
-  background:rgba(0,0,0,.45);
-  backdrop-filter:blur(10px);
-}
+/* FILTERS */
+.filter-none{filter:none}
+.filter-warm{filter:sepia(0.3) saturate(1.4) brightness(1.05)}
+.filter-cool{filter:saturate(0.8) brightness(1.1) hue-rotate(15deg)}
+.filter-bw{filter:grayscale(1) contrast(1.1)}
+.filter-vintage{filter:sepia(0.5) contrast(0.9) brightness(0.95) saturate(1.2)}
+
+/* PERMISSION */
+.perm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;text-align:center;padding:30px;gap:20px}
+.perm-overlay.hidden{display:none}
+.perm-icon{font-size:60px}
+.perm-title{font-size:22px;font-weight:bold}
+.perm-desc{font-size:14px;color:#94a3b8;line-height:1.6;max-width:300px}
+.perm-btn{padding:16px 40px;font-size:17px;font-weight:bold;border:none;border-radius:14px;cursor:pointer;transition:0.2s}
+.perm-allow{background:#22c55e;color:white}
+.perm-allow:active{transform:scale(0.96);background:#16a34a}
+
+/* TOP BAR */
+.top{position:absolute;top:0;left:0;right:0;z-index:10;padding:max(18px,env(safe-area-inset-top)) 18px 25px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(to bottom,rgba(0,0,0,.7),transparent)}
+.top-group{display:flex;align-items:center;gap:10px}
+.icon{width:44px;height:44px;border:0;border-radius:50%;color:#fff;background:rgba(0,0,0,.4);backdrop-filter:blur(10px);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.icon:active{transform:scale(.9)}
+.icon.active-flash{background:rgba(255,200,0,0.4);color:#ffd700}
+.status-badge{padding:8px 13px;border-radius:20px;font-size:12px;font-weight:bold;background:rgba(0,0,0,.45);backdrop-filter:blur(10px)}
 
 /* RECORDING INDICATOR */
-.recording{
-  position:absolute;
-  top:85px;left:50%;
-  transform:translateX(-50%);
-  display:none;
-  align-items:center;gap:8px;
-  padding:8px 14px;border-radius:20px;
-  background:rgba(0,0,0,.7);
-  z-index:20;
-}
-.recording.show{
-  display:flex;
-}
-.red-dot{
-  width:9px;height:9px;
-  border-radius:50%;
-  background:red;
-  animation:blink 1s infinite;
-}
-@keyframes blink{
-  50%{opacity:.3}
-}
+.rec-indicator{position:absolute;top:85px;left:50%;transform:translateX(-50%);display:none;align-items:center;gap:8px;padding:8px 14px;border-radius:20px;background:rgba(0,0,0,.7);z-index:20}
+.rec-indicator.show{display:flex}
+.red-dot{width:9px;height:9px;border-radius:50%;background:red;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.3}}
 
-/* BOTTOM */
-.bottom{
-  position:absolute;
-  left:0;right:0;bottom:0;
-  z-index:10;
-  padding:20px 20px max(25px,env(safe-area-inset-bottom));
-  background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.35),transparent);
-}
+/* FILTER BAR */
+.filter-bar{position:absolute;bottom:180px;left:0;right:0;z-index:15;display:none;justify-content:center;gap:8px;padding:8px 15px;overflow-x:auto}
+.filter-bar.show{display:flex}
+.filter-chip{padding:6px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,0.3);background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.filter-chip.active{border-color:#3b82f6;background:rgba(59,130,246,0.3)}
+
+/* AUDIO WAVE */
+.audio-wave{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:none;align-items:center;gap:4px;z-index:5}
+.audio-wave.show{display:flex}
+.wave-bar{width:6px;background:#10b981;border-radius:3px;animation:wave 0.8s ease-in-out infinite}
+.wave-bar:nth-child(1){height:20px;animation-delay:0s}
+.wave-bar:nth-child(2){height:35px;animation-delay:0.1s}
+.wave-bar:nth-child(3){height:50px;animation-delay:0.2s}
+.wave-bar:nth-child(4){height:35px;animation-delay:0.3s}
+.wave-bar:nth-child(5){height:55px;animation-delay:0.15s}
+.wave-bar:nth-child(6){height:40px;animation-delay:0.25s}
+.wave-bar:nth-child(7){height:25px;animation-delay:0.35s}
+.wave-bar:nth-child(8){height:45px;animation-delay:0.05s}
+.wave-bar:nth-child(9){height:30px;animation-delay:0.2s}
+.wave-bar:nth-child(10){height:20px;animation-delay:0.3s}
+@keyframes wave{0%,100%{transform:scaleY(0.5)}50%{transform:scaleY(1.2)}}
+
+/* BOTTOM BAR */
+.bottom{position:absolute;left:0;right:0;bottom:0;z-index:10;padding:20px 20px max(25px,env(safe-area-inset-bottom));background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.35),transparent)}
 
 /* MODE TABS */
-.modes{
-  display:flex;
-  justify-content:center;
-  gap:35px;
-  margin-bottom:20px;
-}
-.mode{
-  border:0;background:none;
-  color:rgba(255,255,255,.55);
-  font-weight:bold;font-size:14px;
-  cursor:pointer;
-  transition:0.2s;
-}
-.mode.active{
-  color:#fff;
-}
+.modes{display:flex;justify-content:center;gap:30px;margin-bottom:20px}
+.mode-btn{border:0;background:none;color:rgba(255,255,255,.45);font-weight:bold;font-size:14px;cursor:pointer;transition:0.2s;padding:4px 0;position:relative}
+.mode-btn.active{color:#fff}
+.mode-btn.active::after{content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#fff}
 
 /* CONTROLS */
-.controls{
-  display:grid;
-  grid-template-columns:70px 1fr 70px;
-  align-items:center;
-  justify-items:center;
-}
+.ctrl-row{display:grid;grid-template-columns:70px 1fr 70px;align-items:center;justify-items:center}
 
-/* THUMBNAIL */
-.thumb{
-  width:50px;height:50px;
-  border-radius:10px;overflow:hidden;
-  border:2px solid rgba(255,255,255,.8);
-  background:rgba(255,255,255,.12);
-  display:flex;justify-content:center;align-items:center;
-  cursor:pointer;font-size:18px;
-}
-.thumb img,.thumb video{
-  width:100%;height:100%;object-fit:cover;
-}
+/* THUMB */
+.thumb-box{width:50px;height:50px;border-radius:10px;overflow:hidden;border:2px solid rgba(255,255,255,.8);background:rgba(255,255,255,.12);display:flex;justify-content:center;align-items:center;cursor:pointer;font-size:18px}
+.thumb-box img,.thumb-box video{width:100%;height:100%;object-fit:cover}
 
 /* SHUTTER */
-.shutter{
-  width:78px;height:78px;
-  border-radius:50%;
-  background:#fff;
-  border:5px solid rgba(255,255,255,.4);
-  box-shadow:0 0 0 4px rgba(255,255,255,.3);
-  cursor:pointer;transition:.15s;
-}
-.shutter:active{
-  transform:scale(.88);
-}
-.shutter.video-mode{
-  background:#ff3040;
-  border-color:#fff;
-}
-.shutter.is-recording{
-  border-radius:18px;
-  transform:scale(.85);
-}
+.shutter-btn{width:78px;height:78px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.4);box-shadow:0 0 0 4px rgba(255,255,255,.3);cursor:pointer;transition:.15s}
+.shutter-btn:active{transform:scale(.88)}
+.shutter-btn.video-style{background:#ff3040;border-color:#fff}
+.shutter-btn.audio-style{background:#10b981;border-color:#fff}
+.shutter-btn.is-rec{border-radius:18px;transform:scale(.85)}
 
 /* SWITCH */
-.switch{
-  width:50px;height:50px;
-  border:0;border-radius:50%;
-  background:rgba(0,0,0,.45);
-  backdrop-filter:blur(10px);
-  color:#fff;font-size:22px;
-  cursor:pointer;
-}
-.switch:active{
-  transform:scale(.9);
-}
+.switch-btn{width:50px;height:50px;border:0;border-radius:50%;background:rgba(0,0,0,.45);backdrop-filter:blur(10px);color:#fff;font-size:22px;cursor:pointer}
+.switch-btn:active{transform:scale(.9)}
 
-/* PREVIEW SCREEN */
-.preview{
-  position:fixed;inset:0;
-  display:none;
-  background:#000;
-  z-index:100;
-}
-.preview.show{
-  display:block;
-}
-.preview-media{
-  width:100%;height:100%;
-  display:flex;align-items:center;justify-content:center;
-}
-#photoPreview,#videoPreview{
-  max-width:100%;max-height:100%;object-fit:contain;
-}
-.preview-top{
-  position:absolute;
-  top:0;left:0;right:0;
-  padding:max(18px,env(safe-area-inset-top)) 18px;
-  z-index:5;
-}
-.close{
-  width:44px;height:44px;
-  border:0;border-radius:50%;
-  background:rgba(0,0,0,.6);
-  color:#fff;font-size:22px;
-  cursor:pointer;
-}
-.close:active{
-  transform:scale(.9);
-}
+/* ===== PREVIEW SCREEN ===== */
+.preview-screen{position:fixed;inset:0;display:none;background:#000;z-index:100;flex-direction:column}
+.preview-screen.show{display:flex}
 
-/* PREVIEW ACTIONS */
-.actions{
-  position:absolute;
-  left:20px;right:20px;
-  bottom:max(25px,env(safe-area-inset-bottom));
-  display:flex;gap:12px;
-  z-index:5;
-}
-.action{
-  flex:1;height:52px;
-  border:0;border-radius:15px;
-  font-size:15px;font-weight:bold;
-  cursor:pointer;transition:0.2s;
-}
-.retake{
-  color:#fff;
-  background:rgba(255,255,255,.15);
-  backdrop-filter:blur(10px);
-}
-.send{
-  color:#000;
-  background:#fff;
-}
-.action:active{
-  transform:scale(.97);
-}
+.preview-content{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.preview-content img,.preview-content video,.preview-content audio{max-width:100%;max-height:100%;object-fit:contain}
+
+.preview-topbar{position:absolute;top:0;left:0;right:0;padding:max(18px,env(safe-area-inset-top)) 18px;z-index:5;display:flex;justify-content:space-between;align-items:center}
+.close-btn{width:44px;height:44px;border:0;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.close-btn:active{transform:scale(.9)}
+.preview-type-badge{padding:6px 12px;border-radius:15px;font-size:12px;font-weight:bold;backdrop-filter:blur(10px)}
+.badge-photo{background:rgba(59,130,246,0.4)}
+.badge-video{background:rgba(239,68,68,0.4)}
+.badge-audio{background:rgba(16,185,129,0.4)}
+
+.preview-actions{padding:15px 20px max(25px,env(safe-area-inset-bottom));display:flex;gap:12px;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent)}
+.action-btn{flex:1;height:52px;border:0;border-radius:15px;font-size:15px;font-weight:bold;cursor:pointer;transition:0.2s}
+.btn-retake{color:#fff;background:rgba(255,255,255,.15);backdrop-filter:blur(10px)}
+.btn-send{color:#000;background:#fff}
+.action-btn:active{transform:scale(.97)}
+
+/* AUDIO PREVIEW */
+.audio-preview-box{display:flex;flex-direction:column;align-items:center;gap:20px;padding:30px}
+.audio-icon{font-size:80px}
+.audio-label{font-size:16px;color:#94a3b8}
 
 /* TOAST */
-.toast{
-  position:fixed;
-  left:50%;bottom:125px;
-  transform:translateX(-50%) translateY(20px);
-  padding:12px 18px;border-radius:25px;
-  background:rgba(0,0,0,.8);
-  backdrop-filter:blur(10px);
-  font-size:14px;
-  opacity:0;pointer-events:none;
-  transition:.3s;z-index:300;
-  white-space:nowrap;
-}
-.toast.show{
-  opacity:1;
-  transform:translateX(-50%) translateY(0);
-}
+.toast-msg{position:fixed;left:50%;bottom:125px;transform:translateX(-50%) translateY(20px);padding:12px 18px;border-radius:25px;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);font-size:14px;opacity:0;pointer-events:none;transition:.3s;z-index:300;white-space:nowrap}
+.toast-msg.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* LOADER */
-.loader{
-  position:fixed;inset:0;
-  display:none;
-  align-items:center;justify-content:center;
-  flex-direction:column;gap:15px;
-  background:rgba(0,0,0,.7);
-  backdrop-filter:blur(6px);
-  z-index:500;
-}
-.loader.show{
-  display:flex;
-}
-.spinner{
-  width:42px;height:42px;
-  border:4px solid rgba(255,255,255,.25);
-  border-top-color:#fff;
-  border-radius:50%;
-  animation:spin .8s linear infinite;
-}
-@keyframes spin{
-  to{transform:rotate(360deg)}
-}
+.loader-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:15px;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:500}
+.loader-overlay.show{display:flex}
+.spin-circle{width:42px;height:42px;border:4px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-@media(min-width:700px){
-  .app{
-    max-width:500px;
-    margin:auto;
-    box-shadow:0 0 80px rgba(0,0,0,.8);
-  }
-}
+@media(min-width:700px){.app{max-width:500px;margin:auto;box-shadow:0 0 80px rgba(0,0,0,.8)}}
 </style>
 </head>
 <body>
 
-<!-- PERMISSION OVERLAY -->
+<!-- PERMISSION -->
 <div class="perm-overlay" id="permOverlay">
   <div class="perm-icon">📸</div>
   <div class="perm-title">Camera & Mic Access</div>
-  <div class="perm-desc">
-    Photo aur Video capture karne ke liye Camera aur Microphone ki permission deni hogi.<br><br>
-    Niche <b>Allow</b> par click karein, phir browser popup me bhi <b>Allow</b> dabayein.
-  </div>
+  <div class="perm-desc">Photo, Video aur Audio capture karne ke liye Camera aur Microphone ki permission deni hogi.<br><br>Niche <b>Allow</b> par click karein.</div>
   <button class="perm-btn perm-allow" onclick="grantPermission()">✅ Allow Camera & Mic</button>
 </div>
 
-<div class="app" id="mainApp" style="display:none;">
-
+<!-- MAIN APP -->
+<div class="app" id="mainApp" style="display:none">
   <video id="camera" autoplay playsinline muted></video>
+
+  <!-- Audio Waveform -->
+  <div class="audio-wave" id="audioWave">
+    <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+    <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+    <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+    <div class="wave-bar"></div>
+  </div>
 
   <!-- TOP -->
   <div class="top">
     <div class="top-group">
-      <div class="status" id="status">Camera</div>
+      <button class="icon" id="filterToggle" title="Filters">🎨</button>
+      <div class="status-badge" id="statusBadge">Photo</div>
     </div>
     <div class="top-group">
-      <button class="icon" id="flashBtn">⚡</button>
+      <button class="icon" id="flashBtn" title="Flash">⚡</button>
     </div>
   </div>
 
-  <!-- RECORDING INDICATOR -->
-  <div class="recording" id="recording">
+  <!-- REC -->
+  <div class="rec-indicator" id="recIndicator">
     <span class="red-dot"></span>
-    <span id="timer">00:00</span>
+    <span id="timerText">00:00</span>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar" id="filterBar">
+    <button class="filter-chip active" data-filter="none">Normal</button>
+    <button class="filter-chip" data-filter="warm">☀️ Warm</button>
+    <button class="filter-chip" data-filter="cool">❄️ Cool</button>
+    <button class="filter-chip" data-filter="bw">🖤 B&W</button>
+    <button class="filter-chip" data-filter="vintage">📷 Vintage</button>
   </div>
 
   <!-- BOTTOM -->
   <div class="bottom">
     <div class="modes">
-      <button class="mode active" id="photoMode">PHOTO</button>
-      <button class="mode" id="videoMode">VIDEO</button>
-      <button class="mode" id="audioMode">AUDIO</button>
+      <button class="mode-btn active" data-mode="photo">PHOTO</button>
+      <button class="mode-btn" data-mode="video">VIDEO</button>
+      <button class="mode-btn" data-mode="audio">AUDIO</button>
     </div>
-    <div class="controls">
-      <div class="thumb" id="thumb">▣</div>
-      <button class="shutter" id="shutter"></button>
-      <button class="switch" id="switchBtn">🔄</button>
+    <div class="ctrl-row">
+      <div class="thumb-box" id="thumbBox">▣</div>
+      <button class="shutter-btn" id="shutterBtn"></button>
+      <button class="switch-btn" id="switchCamBtn">🔄</button>
     </div>
   </div>
-
 </div>
 
 <!-- PREVIEW -->
-<div class="preview" id="preview">
-  <div class="preview-media">
-    <img id="photoPreview" style="display:none;">
-    <video id="videoPreview" controls playsinline style="display:none;"></video>
+<div class="preview-screen" id="previewScreen">
+  <div class="preview-topbar">
+    <button class="close-btn" id="closePreview">✕</button>
+    <div class="preview-type-badge" id="previewBadge">📷 Photo</div>
   </div>
-  <div class="preview-top">
-    <button class="close" id="closeBtn">✕</button>
-  </div>
-  <div class="actions">
-    <button class="action retake" id="retakeBtn">↩ Retake</button>
-    <button class="action send" id="sendBtn">☁ Send to Drive</button>
+  <div class="preview-content" id="previewContent"></div>
+  <div class="preview-actions">
+    <button class="action-btn btn-retake" id="retakeBtn">↩ Retake</button>
+    <button class="action-btn btn-send" id="sendBtn">☁ Send to Drive</button>
   </div>
 </div>
 
 <!-- TOAST -->
-<div class="toast" id="toast"></div>
+<div class="toast-msg" id="toastMsg"></div>
 
 <!-- LOADER -->
-<div class="loader" id="loader">
-  <div class="spinner"></div>
-  <div id="loaderText">Sending...</div>
+<div class="loader-overlay" id="loaderOverlay">
+  <div class="spin-circle"></div>
+  <div id="loaderLabel">Sending...</div>
 </div>
 
 <script>
 /* ===== ELEMENTS ===== */
-const camera = document.getElementById("camera");
-const shutter = document.getElementById("shutter");
-const photoMode = document.getElementById("photoMode");
-const videoMode = document.getElementById("videoMode");
-const audioMode = document.getElementById("audioMode");
-const switchBtn = document.getElementById("switchBtn");
-const statusEl = document.getElementById("status");
-const previewEl = document.getElementById("preview");
-const photoPreview = document.getElementById("photoPreview");
-const videoPreview = document.getElementById("videoPreview");
+const cam = document.getElementById("camera");
+const shutterBtn = document.getElementById("shutterBtn");
+const switchCamBtn = document.getElementById("switchCamBtn");
+const flashBtn = document.getElementById("flashBtn");
+const filterToggle = document.getElementById("filterToggle");
+const filterBar = document.getElementById("filterBar");
+const statusBadge = document.getElementById("statusBadge");
+const recIndicator = document.getElementById("recIndicator");
+const timerText = document.getElementById("timerText");
+const audioWave = document.getElementById("audioWave");
+const thumbBox = document.getElementById("thumbBox");
+const previewScreen = document.getElementById("previewScreen");
+const previewContent = document.getElementById("previewContent");
+const previewBadge = document.getElementById("previewBadge");
 const sendBtn = document.getElementById("sendBtn");
 const retakeBtn = document.getElementById("retakeBtn");
-const closeBtn = document.getElementById("closeBtn");
-const thumb = document.getElementById("thumb");
-const recordingEl = document.getElementById("recording");
-const timerEl = document.getElementById("timer");
-const loader = document.getElementById("loader");
-const loaderText = document.getElementById("loaderText");
-const toastEl = document.getElementById("toast");
+const closePreview = document.getElementById("closePreview");
+const loaderOverlay = document.getElementById("loaderOverlay");
+const loaderLabel = document.getElementById("loaderLabel");
+const toastMsg = document.getElementById("toastMsg");
 const permOverlay = document.getElementById("permOverlay");
 const mainApp = document.getElementById("mainApp");
 
 /* ===== STATE ===== */
 let stream = null;
-let facingMode = "user";
-let mode = "photo"; // photo | video | audio
-let mediaRecorder = null;
+let facing = "user";
+let mode = "photo";
+let recorder = null;
 let chunks = [];
 let capturedBlob = null;
-let timerInterval = null;
-let recordingStart = 0;
+let capturedType = "photo";
+let timerInt = null;
+let recStart = 0;
+let flashOn = false;
+let currentFilter = "none";
 
 /* ===== PERMISSION ===== */
 async function grantPermission() {
   try {
     stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } },
-      audio: true
+      video:{facingMode:facing,width:{ideal:1920},height:{ideal:1080}},
+      audio:true
     });
-    camera.srcObject = stream;
-    await camera.play();
-    if (facingMode === "user") camera.classList.add("mirror");
-    
+    cam.srcObject = stream;
+    await cam.play();
+    if(facing==="user") cam.classList.add("mirror");
     permOverlay.classList.add("hidden");
     mainApp.style.display = "block";
-    statusEl.textContent = "Photo";
-  } catch (err) {
-    // Try without audio
+  } catch(e) {
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode } });
-      camera.srcObject = stream;
-      await camera.play();
-      if (facingMode === "user") camera.classList.add("mirror");
-      
+      stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:facing}});
+      cam.srcObject = stream;
+      await cam.play();
+      if(facing==="user") cam.classList.add("mirror");
       permOverlay.classList.add("hidden");
       mainApp.style.display = "block";
-      statusEl.textContent = "Photo (No Mic)";
-    } catch (e) {
-      showToast("❌ Camera permission allow karein!");
+      toast("⚠️ Mic not available");
+    } catch(err) {
+      toast("❌ Camera permission allow karein!");
     }
   }
 }
 
-/* ===== CAMERA RESTART ===== */
-async function startCamera() {
-  if (stream) stream.getTracks().forEach(t => t.stop());
+/* ===== CAMERA ===== */
+async function restartCam() {
+  if(stream) stream.getTracks().forEach(t=>t.stop());
+  flashOn = false;
+  flashBtn.classList.remove("active-flash");
   try {
     stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } },
-      audio: true
+      video:{facingMode:facing,width:{ideal:1920},height:{ideal:1080}},
+      audio:true
     });
-    camera.srcObject = stream;
-    await camera.play();
-    camera.classList.toggle("mirror", facingMode === "user");
-  } catch (err) {
+    cam.srcObject = stream;
+    await cam.play();
+    cam.classList.toggle("mirror", facing==="user");
+  } catch(e) {
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode } });
-      camera.srcObject = stream;
-      await camera.play();
-      camera.classList.toggle("mirror", facingMode === "user");
-    } catch (e) {
-      showToast("Camera error!");
-    }
+      stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:facing}});
+      cam.srcObject = stream;
+      await cam.play();
+      cam.classList.toggle("mirror", facing==="user");
+    } catch(err) { toast("Camera error"); }
   }
 }
 
-/* ===== MODE SWITCHING ===== */
-photoMode.onclick = () => {
-  if (mediaRecorder && mediaRecorder.state === "recording") return;
-  mode = "photo";
-  photoMode.classList.add("active");
-  videoMode.classList.remove("active");
-  audioMode.classList.remove("active");
-  shutter.classList.remove("video-mode");
-  shutter.style.background = "#fff";
-  statusEl.textContent = "Photo";
-  camera.style.display = "block";
+/* ===== SWITCH CAMERA ===== */
+switchCamBtn.onclick = async () => {
+  facing = facing==="user" ? "environment" : "user";
+  await restartCam();
 };
 
-videoMode.onclick = () => {
-  if (mediaRecorder && mediaRecorder.state === "recording") return;
-  mode = "video";
-  videoMode.classList.add("active");
-  photoMode.classList.remove("active");
-  audioMode.classList.remove("active");
-  shutter.classList.add("video-mode");
-  shutter.style.background = "#ff3040";
-  statusEl.textContent = "Video";
-  camera.style.display = "block";
+/* ===== FLASH / TORCH ===== */
+flashBtn.onclick = async () => {
+  if(!stream) return;
+  const vTrack = stream.getVideoTracks()[0];
+  if(!vTrack) return;
+  try {
+    const caps = vTrack.getCapabilities();
+    if(!caps.torch) { toast("Flash not available"); return; }
+    flashOn = !flashOn;
+    await vTrack.applyConstraints({ advanced:[{torch:flashOn}] });
+    flashBtn.classList.toggle("active-flash", flashOn);
+    toast(flashOn ? "⚡ Flash ON" : "⚡ Flash OFF");
+  } catch(e) { toast("Flash not supported"); }
 };
 
-audioMode.onclick = () => {
-  if (mediaRecorder && mediaRecorder.state === "recording") return;
-  mode = "audio";
-  audioMode.classList.add("active");
-  photoMode.classList.remove("active");
-  videoMode.classList.remove("active");
-  shutter.classList.add("video-mode");
-  shutter.style.background = "#10b981";
-  statusEl.textContent = "Audio";
-  camera.style.display = "none";
+/* ===== FILTERS ===== */
+filterToggle.onclick = () => {
+  filterBar.classList.toggle("show");
 };
+
+filterBar.querySelectorAll(".filter-chip").forEach(chip => {
+  chip.onclick = () => {
+    filterBar.querySelectorAll(".filter-chip").forEach(c=>c.classList.remove("active"));
+    chip.classList.add("active");
+    currentFilter = chip.dataset.filter;
+    cam.className = "";
+    if(facing==="user") cam.classList.add("mirror");
+    cam.classList.add("filter-" + currentFilter);
+  };
+});
+
+/* ===== MODE TABS ===== */
+document.querySelectorAll(".mode-btn").forEach(btn => {
+  btn.onclick = () => {
+    if(recorder && recorder.state==="recording") return;
+    document.querySelectorAll(".mode-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    mode = btn.dataset.mode;
+
+    shutterBtn.className = "shutter-btn";
+    if(mode==="video") shutterBtn.classList.add("video-style");
+    if(mode==="audio") shutterBtn.classList.add("audio-style");
+
+    cam.style.display = mode==="audio" ? "none" : "block";
+    audioWave.classList.toggle("show", mode==="audio");
+
+    statusBadge.textContent = mode.charAt(0).toUpperCase() + mode.slice(1);
+    filterBar.classList.remove("show");
+  };
+});
 
 /* ===== SHUTTER ===== */
-shutter.onclick = () => {
-  if (!stream) return;
-  if (mode === "photo") takePhoto();
-  else if (mode === "video") toggleVideoRecording();
-  else if (mode === "audio") toggleAudioRecording();
+shutterBtn.onclick = () => {
+  if(!stream) return;
+  if(mode==="photo") takePhoto();
+  else if(mode==="video") toggleVideo();
+  else if(mode==="audio") toggleAudio();
 };
 
 /* ===== PHOTO ===== */
 function takePhoto() {
-  if (camera.videoWidth === 0) { showToast("Camera not ready"); return; }
-  
+  if(!cam.videoWidth) { toast("Camera not ready"); return; }
+
   const canvas = document.createElement("canvas");
-  canvas.width = camera.videoWidth;
-  canvas.height = camera.videoHeight;
+  canvas.width = cam.videoWidth;
+  canvas.height = cam.videoHeight;
   const ctx = canvas.getContext("2d");
-  
-  if (facingMode === "user") {
-    ctx.translate(canvas.width, 0);
-    ctx.scale(-1, 1);
+
+  // Apply filter to canvas
+  ctx.filter = getFilterCSS(currentFilter);
+
+  if(facing==="user") {
+    ctx.translate(canvas.width,0);
+    ctx.scale(-1,1);
   }
-  ctx.drawImage(camera, 0, 0, canvas.width, canvas.height);
-  
+  ctx.drawImage(cam,0,0,canvas.width,canvas.height);
+
   canvas.toBlob(blob => {
-    if (!blob) { showToast("Capture failed"); return; }
+    if(!blob) { toast("Capture failed"); return; }
     capturedBlob = blob;
-    photoPreview.src = URL.createObjectURL(blob);
-    photoPreview.style.display = "block";
-    videoPreview.style.display = "none";
-    previewEl.classList.add("show");
-    updateThumb(blob, false);
-  }, "image/jpeg", 0.85);
+    capturedType = "photo";
+    showPreview();
+  }, "image/jpeg", 0.88);
 }
 
-/* ===== VIDEO RECORDING ===== */
-function toggleVideoRecording() {
-  if (mediaRecorder && mediaRecorder.state === "recording") {
-    mediaRecorder.stop();
-    clearInterval(timerInterval);
-    recordingEl.classList.remove("show");
-    shutter.classList.remove("is-recording");
+function getFilterCSS(f) {
+  switch(f) {
+    case "warm": return "sepia(0.3) saturate(1.4) brightness(1.05)";
+    case "cool": return "saturate(0.8) brightness(1.1) hue-rotate(15deg)";
+    case "bw": return "grayscale(1) contrast(1.1)";
+    case "vintage": return "sepia(0.5) contrast(0.9) brightness(0.95) saturate(1.2)";
+    default: return "none";
+  }
+}
+
+/* ===== VIDEO ===== */
+function toggleVideo() {
+  if(recorder && recorder.state==="recording") {
+    recorder.stop();
+    clearInterval(timerInt);
+    recIndicator.classList.remove("show");
+    shutterBtn.classList.remove("is-rec");
   } else {
     chunks = [];
     let mime = "video/webm";
-    if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")) mime = "video/webm;codecs=vp9,opus";
-    else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp8,opus")) mime = "video/webm;codecs=vp8,opus";
-    
-    try {
-      mediaRecorder = new MediaRecorder(stream, { mimeType: mime });
-    } catch (e) { showToast("Recording not supported"); return; }
-    
-    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-    mediaRecorder.onstop = () => {
-      capturedBlob = new Blob(chunks, { type: mime });
-      videoPreview.src = URL.createObjectURL(capturedBlob);
-      videoPreview.style.display = "block";
-      photoPreview.style.display = "none";
-      previewEl.classList.add("show");
-      updateThumb(capturedBlob, true);
+    if(MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")) mime="video/webm;codecs=vp9,opus";
+    else if(MediaRecorder.isTypeSupported("video/webm;codecs=vp8,opus")) mime="video/webm;codecs=vp8,opus";
+
+    try { recorder = new MediaRecorder(stream,{mimeType:mime}); }
+    catch(e) { toast("Recording not supported"); return; }
+
+    recorder.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
+    recorder.onstop = () => {
+      capturedBlob = new Blob(chunks, {type:mime});
+      capturedType = "video";
+      showPreview();
     };
-    
-    mediaRecorder.start(1000);
-    recordingStart = Date.now();
-    recordingEl.classList.add("show");
-    shutter.classList.add("is-recording");
-    timerInterval = setInterval(updateTimer, 500);
-    statusEl.textContent = "Recording...";
+
+    recorder.start(1000);
+    recStart = Date.now();
+    recIndicator.classList.add("show");
+    shutterBtn.classList.add("is-rec");
+    timerInt = setInterval(updateClock, 500);
+    statusBadge.textContent = "Recording...";
   }
 }
 
-/* ===== AUDIO RECORDING ===== */
-function toggleAudioRecording() {
-  if (mediaRecorder && mediaRecorder.state === "recording") {
-    mediaRecorder.stop();
-    clearInterval(timerInterval);
-    recordingEl.classList.remove("show");
-    shutter.classList.remove("is-recording");
+/* ===== AUDIO ===== */
+function toggleAudio() {
+  if(recorder && recorder.state==="recording") {
+    recorder.stop();
+    clearInterval(timerInt);
+    recIndicator.classList.remove("show");
+    shutterBtn.classList.remove("is-rec");
   } else {
     chunks = [];
-    const audioTracks = stream.getAudioTracks();
-    if (audioTracks.length === 0) { showToast("Mic not found!"); return; }
-    
-    const audioStream = new MediaStream(audioTracks);
-    mediaRecorder = new MediaRecorder(audioStream);
-    
-    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-    mediaRecorder.onstop = () => {
-      capturedBlob = new Blob(chunks, { type: "audio/webm" });
-      // Audio ke liye photo preview me waveform text dikhao
-      photoPreview.src = "";
-      photoPreview.style.display = "none";
-      videoPreview.src = URL.createObjectURL(capturedBlob);
-      videoPreview.style.display = "block";
-      previewEl.classList.add("show");
+    const aTracks = stream.getAudioTracks();
+    if(!aTracks.length) { toast("Mic not found!"); return; }
+
+    const aStream = new MediaStream(aTracks);
+    recorder = new MediaRecorder(aStream);
+
+    recorder.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
+    recorder.onstop = () => {
+      capturedBlob = new Blob(chunks, {type:"audio/webm"});
+      capturedType = "audio";
+      showPreview();
     };
-    
-    mediaRecorder.start(1000);
-    recordingStart = Date.now();
-    recordingEl.classList.add("show");
-    shutter.classList.add("is-recording");
-    timerInterval = setInterval(updateTimer, 500);
-    statusEl.textContent = "Recording Audio...";
+
+    recorder.start(1000);
+    recStart = Date.now();
+    recIndicator.classList.add("show");
+    shutterBtn.classList.add("is-rec");
+    timerInt = setInterval(updateClock, 500);
+    statusBadge.textContent = "Recording Audio...";
   }
 }
 
 /* ===== TIMER ===== */
-function updateTimer() {
-  const sec = Math.floor((Date.now() - recordingStart) / 1000);
-  const m = String(Math.floor(sec / 60)).padStart(2, "0");
-  const s = String(sec % 60).padStart(2, "0");
-  timerEl.textContent = m + ":" + s;
-  if (sec >= 300) {
-    if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
-    clearInterval(timerInterval);
-    recordingEl.classList.remove("show");
-    shutter.classList.remove("is-recording");
-    showToast("5 min limit reached");
+function updateClock() {
+  const sec = Math.floor((Date.now()-recStart)/1000);
+  const m = String(Math.floor(sec/60)).padStart(2,"0");
+  const s = String(sec%60).padStart(2,"0");
+  timerText.textContent = m+":"+s;
+  if(sec>=300) {
+    if(recorder && recorder.state==="recording") recorder.stop();
+    clearInterval(timerInt);
+    recIndicator.classList.remove("show");
+    shutterBtn.classList.remove("is-rec");
+    toast("5 min limit reached");
   }
+}
+
+/* ===== SHOW PREVIEW ===== */
+function showPreview() {
+  previewContent.innerHTML = "";
+
+  if(capturedType==="photo") {
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(capturedBlob);
+    previewContent.appendChild(img);
+    previewBadge.textContent = "📷 Photo";
+    previewBadge.className = "preview-type-badge badge-photo";
+
+  } else if(capturedType==="video") {
+    const vid = document.createElement("video");
+    vid.src = URL.createObjectURL(capturedBlob);
+    vid.controls = true;
+    vid.autoplay = true;
+    vid.playsInline = true;
+    vid.style.maxWidth = "100%";
+    vid.style.maxHeight = "100%";
+    previewContent.appendChild(vid);
+    previewBadge.textContent = "🎥 Video";
+    previewBadge.className = "preview-type-badge badge-video";
+
+  } else if(capturedType==="audio") {
+    const box = document.createElement("div");
+    box.className = "audio-preview-box";
+    box.innerHTML = '<div class="audio-icon">🎵</div><div class="audio-label">Audio Recording Ready</div>';
+    const aud = document.createElement("audio");
+    aud.src = URL.createObjectURL(capturedBlob);
+    aud.controls = true;
+    aud.autoplay = true;
+    aud.style.width = "90%";
+    box.appendChild(aud);
+    previewContent.appendChild(box);
+    previewBadge.textContent = "🎙️ Audio";
+    previewBadge.className = "preview-type-badge badge-audio";
+  }
+
+  // Update thumbnail
+  updateThumb();
+
+  previewScreen.classList.add("show");
 }
 
 /* ===== THUMBNAIL ===== */
-function updateThumb(blob, isVideo) {
-  thumb.innerHTML = "";
-  const url = URL.createObjectURL(blob);
-  if (!isVideo) {
+function updateThumb() {
+  thumbBox.innerHTML = "";
+  if(capturedType==="photo") {
     const img = document.createElement("img");
-    img.src = url;
-    thumb.appendChild(img);
-  } else {
+    img.src = URL.createObjectURL(capturedBlob);
+    thumbBox.appendChild(img);
+  } else if(capturedType==="video") {
     const vid = document.createElement("video");
-    vid.src = url;
+    vid.src = URL.createObjectURL(capturedBlob);
     vid.muted = true;
     vid.playsInline = true;
-    thumb.appendChild(vid);
+    thumbBox.appendChild(vid);
+  } else {
+    thumbBox.innerHTML = "🎵";
   }
 }
 
-/* ===== SEND TO DRIVE (google.script.run) ===== */
+/* ===== RETAKE ===== */
+async function doRetake() {
+  previewScreen.classList.remove("show");
+  previewContent.innerHTML = "";
+  capturedBlob = null;
+  await restartCam();
+  statusBadge.textContent = mode.charAt(0).toUpperCase() + mode.slice(1);
+}
+retakeBtn.onclick = doRetake;
+closePreview.onclick = doRetake;
+
+/* ===== THUMB CLICK -> OPEN PREVIEW ===== */
+thumbBox.onclick = () => {
+  if(capturedBlob) showPreview();
+};
+
+/* ===== SEND TO DRIVE ===== */
 sendBtn.onclick = () => {
-  if (!capturedBlob) { showToast("Nothing to send"); return; }
-  
-  const isVideo = capturedBlob.type.includes("video");
-  const isAudio = capturedBlob.type.includes("audio");
-  
-  let ext = "jpg";
-  let prefix = "photo_";
-  if (isVideo) { ext = "webm"; prefix = "video_"; }
-  if (isAudio) { ext = "webm"; prefix = "audio_"; }
-  
+  if(!capturedBlob) { toast("Nothing to send"); return; }
+
+  let ext = "jpg", prefix = "photo_";
+  if(capturedType==="video") { ext="webm"; prefix="video_"; }
+  if(capturedType==="audio") { ext="webm"; prefix="audio_"; }
+
   const fileName = prefix + Date.now() + "." + ext;
-  
-  loaderText.textContent = "Sending to Google Drive...";
-  loader.classList.add("show");
+
+  loaderLabel.textContent = "Sending to Google Drive...";
+  loaderOverlay.classList.add("show");
   sendBtn.disabled = true;
-  
+
   const reader = new FileReader();
   reader.onloadend = () => {
-    const base64Full = reader.result;
-    const base64Clean = base64Full.split(",")[1];
-    
+    const b64 = reader.result.split(",")[1];
+
     google.script.run
       .withSuccessHandler(result => {
-        loader.classList.remove("show");
+        loaderOverlay.classList.remove("show");
         sendBtn.disabled = false;
-        if (result && result.success) {
-          showToast(result.msg);
+        if(result && result.success) {
+          toast(result.msg);
+          // Auto close preview after success
+          setTimeout(doRetake, 1500);
         } else {
-          showToast(result ? result.msg : "Upload failed");
+          toast(result ? result.msg : "Upload failed");
         }
       })
       .withFailureHandler(err => {
-        loader.classList.remove("show");
+        loaderOverlay.classList.remove("show");
         sendBtn.disabled = false;
-        showToast("❌ Upload Error: " + err);
+        toast("❌ Upload Error");
       })
-      .uploadFile(fileName, capturedBlob.type, base64Clean);
+      .uploadFile(fileName, capturedBlob.type, b64);
   };
   reader.readAsDataURL(capturedBlob);
 };
 
-/* ===== RETAKE ===== */
-async function retake() {
-  previewEl.classList.remove("show");
-  photoPreview.src = "";
-  videoPreview.pause();
-  videoPreview.src = "";
-  capturedBlob = null;
-  await startCamera();
-  statusEl.textContent = mode === "photo" ? "Photo" : mode === "video" ? "Video" : "Audio";
-}
-
-retakeBtn.onclick = retake;
-closeBtn.onclick = retake;
-
-/* ===== SWITCH CAMERA ===== */
-switchBtn.onclick = async () => {
-  facingMode = facingMode === "user" ? "environment" : "user";
-  await startCamera();
-};
-
 /* ===== TOAST ===== */
-let toastTimeout;
-function showToast(msg) {
-  toastEl.textContent = msg;
-  toastEl.classList.add("show");
-  clearTimeout(toastTimeout);
-  toastTimeout = setTimeout(() => toastEl.classList.remove("show"), 2800);
+let toastT;
+function toast(msg) {
+  toastMsg.textContent = msg;
+  toastMsg.classList.add("show");
+  clearTimeout(toastT);
+  toastT = setTimeout(()=>toastMsg.classList.remove("show"), 2800);
 }
 </script>
 </body>
