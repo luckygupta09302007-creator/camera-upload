@@ -17,120 +17,500 @@
       background: #111;
       color: white;
       font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
     }
 
     .container {
       width: 100%;
       max-width: 700px;
+      margin: auto;
       padding: 20px;
       text-align: center;
     }
 
     h1 {
-      margin-bottom: 8px;
+      margin-bottom: 5px;
     }
 
-    p {
-      color: #bbb;
+    .subtitle {
+      color: #aaa;
+      font-size: 14px;
+      margin-bottom: 18px;
     }
 
     video {
       width: 100%;
       max-height: 70vh;
-      margin-top: 20px;
-      background: black;
+      background: #000;
       border-radius: 18px;
       object-fit: cover;
     }
 
-    button {
-      margin-top: 20px;
-      padding: 15px 24px;
-      border: none;
-      border-radius: 12px;
-      background: #2196f3;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
+    .timer {
+      font-size: 25px;
+      font-weight: bold;
+      margin: 12px 0;
     }
 
-    button:active {
-      transform: scale(0.97);
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 13px 18px;
+      font-size: 15px;
+      cursor: pointer;
+      color: white;
+    }
+
+    #permissionBtn {
+      background: #2196f3;
+    }
+
+    #photoBtn {
+      background: #1976d2;
+      display: none;
+    }
+
+    #recordBtn {
+      background: #e53935;
+      display: none;
+    }
+
+    #stopBtn {
+      background: #ff9800;
+      display: none;
+    }
+
+    #switchBtn {
+      background: #444;
+      display: none;
     }
 
     #status {
       margin-top: 18px;
+      min-height: 24px;
       color: #ddd;
+    }
+
+    .recording {
+      color: #ff5252 !important;
+      font-weight: bold;
+    }
+
+    canvas {
+      display: none;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="container">
+<div class="container">
 
-    <h1>📷 Camera Studio</h1>
+  <h1>📷 Camera Studio</h1>
 
-    <p>
-      Camera aur microphone use karne ke liye
-      neeche button dabayein.
-    </p>
+  <div class="subtitle">
+    Photo ya video capture karein
+  </div>
 
-    <button id="allowButton">
-      📷 Allow Camera & Microphone
+  <button id="permissionBtn">
+    📷 Allow Camera & Microphone
+  </button>
+
+  <video id="preview" autoplay muted playsinline></video>
+
+  <div id="timer" class="timer">
+    00:00
+  </div>
+
+  <div class="controls">
+
+    <button id="photoBtn">
+      📸 Take Photo
     </button>
 
-    <video id="camera" autoplay muted playsinline></video>
+    <button id="recordBtn">
+      🔴 Start Video
+    </button>
 
-    <div id="status">
-      Permission ka wait ho raha hai...
-    </div>
+    <button id="stopBtn">
+      ⏹ Stop Video
+    </button>
+
+    <button id="switchBtn">
+      🔄 Switch Camera
+    </button>
 
   </div>
 
-  <script>
+  <div id="status">
+    Camera permission ka wait ho raha hai...
+  </div>
 
-    const allowButton = document.getElementById("allowButton");
-    const camera = document.getElementById("camera");
-    const status = document.getElementById("status");
+  <canvas id="canvas"></canvas>
 
-    let stream = null;
+</div>
 
-    allowButton.addEventListener("click", async () => {
+<script>
 
-      try {
+const permissionBtn = document.getElementById("permissionBtn");
+const photoBtn = document.getElementById("photoBtn");
+const recordBtn = document.getElementById("recordBtn");
+const stopBtn = document.getElementById("stopBtn");
+const switchBtn = document.getElementById("switchBtn");
 
-        status.textContent =
-          "Camera aur microphone permission maangi ja rahi hai...";
+const preview = document.getElementById("preview");
+const status = document.getElementById("status");
+const timer = document.getElementById("timer");
+const canvas = document.getElementById("canvas");
 
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: true
-        });
+let stream = null;
+let recorder = null;
+let chunks = [];
 
-        camera.srcObject = stream;
+let facingMode = "user";
 
-        status.textContent =
-          "✅ Camera aur microphone successfully allowed!";
+let timerInterval = null;
+let seconds = 0;
 
-        allowButton.style.display = "none";
 
-      } catch (error) {
+/* =========================
+   CAMERA + MICROPHONE
+========================= */
 
-        console.error(error);
+async function startCamera() {
 
-        status.textContent =
-          "❌ Permission denied: " +
-          error.name;
+  try {
 
-      }
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+
+    stream = await navigator.mediaDevices.getUserMedia({
+
+      video: {
+        facingMode: facingMode,
+        width: {
+          ideal: 1280
+        },
+        height: {
+          ideal: 720
+        }
+      },
+
+      audio: true
 
     });
 
-  </script>
+    preview.srcObject = stream;
+
+    permissionBtn.style.display = "none";
+
+    photoBtn.style.display = "inline-block";
+    recordBtn.style.display = "inline-block";
+    switchBtn.style.display = "inline-block";
+
+    status.textContent =
+      "✅ Camera aur microphone ready.";
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    status.textContent =
+      "❌ Permission error: " + error.name;
+
+  }
+
+}
+
+
+permissionBtn.addEventListener(
+  "click",
+  startCamera
+);
+
+
+/* =========================
+   PHOTO
+========================= */
+
+photoBtn.addEventListener("click", () => {
+
+  if (!stream) return;
+
+  const width = preview.videoWidth;
+  const height = preview.videoHeight;
+
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext("2d");
+
+  ctx.drawImage(
+    preview,
+    0,
+    0,
+    width,
+    height
+  );
+
+  canvas.toBlob(
+    (blob) => {
+
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download =
+        "photo_" +
+        Date.now() +
+        ".jpg";
+
+      /*
+       IMPORTANT:
+       Ye sirf testing ke liye
+       browser download hai.
+      */
+
+      a.click();
+
+      URL.revokeObjectURL(url);
+
+      status.textContent =
+        "📸 Photo captured.";
+
+    },
+
+    "image/jpeg",
+
+    0.9
+
+  );
+
+});
+
+
+/* =========================
+   START VIDEO
+========================= */
+
+recordBtn.addEventListener("click", () => {
+
+  if (!stream) return;
+
+  chunks = [];
+
+  let mimeType = "";
+
+  if (
+    MediaRecorder.isTypeSupported(
+      "video/webm;codecs=vp9,opus"
+    )
+  ) {
+
+    mimeType =
+      "video/webm;codecs=vp9,opus";
+
+  }
+
+  else if (
+    MediaRecorder.isTypeSupported(
+      "video/webm"
+    )
+  ) {
+
+    mimeType = "video/webm";
+
+  }
+
+  recorder = mimeType
+    ? new MediaRecorder(
+        stream,
+        { mimeType: mimeType }
+      )
+    : new MediaRecorder(stream);
+
+
+  recorder.ondataavailable = event => {
+
+    if (event.data.size > 0) {
+      chunks.push(event.data);
+    }
+
+  };
+
+
+  recorder.onstop = saveVideo;
+
+
+  recorder.start(1000);
+
+
+  recordBtn.style.display = "none";
+  photoBtn.style.display = "none";
+  switchBtn.style.display = "none";
+
+  stopBtn.style.display = "inline-block";
+
+
+  seconds = 0;
+
+  timer.textContent = "00:00";
+
+  status.textContent =
+    "🔴 Recording...";
+
+  status.classList.add("recording");
+
+
+  timerInterval = setInterval(() => {
+
+    seconds++;
+
+    const minutes =
+      Math.floor(seconds / 60);
+
+    const secs =
+      seconds % 60;
+
+    timer.textContent =
+      String(minutes).padStart(2, "0")
+      + ":" +
+      String(secs).padStart(2, "0");
+
+
+    /*
+      Maximum recording time:
+      5 minutes
+    */
+
+    if (seconds >= 300) {
+      stopRecording();
+    }
+
+  }, 1000);
+
+});
+
+
+/* =========================
+   STOP VIDEO
+========================= */
+
+stopBtn.addEventListener(
+  "click",
+  stopRecording
+);
+
+
+function stopRecording() {
+
+  if (
+    !recorder ||
+    recorder.state === "inactive"
+  ) {
+    return;
+  }
+
+  recorder.stop();
+
+  clearInterval(timerInterval);
+
+  stopBtn.style.display = "none";
+
+  photoBtn.style.display = "inline-block";
+  recordBtn.style.display = "inline-block";
+  switchBtn.style.display = "inline-block";
+
+  status.classList.remove("recording");
+
+  status.textContent =
+    "⏳ Video prepare ho raha hai...";
+
+}
+
+
+/* =========================
+   SAVE VIDEO — TEST
+========================= */
+
+function saveVideo() {
+
+  const blob = new Blob(
+    chunks,
+    {
+      type:
+        recorder.mimeType ||
+        "video/webm"
+    }
+  );
+
+
+  /*
+    Abhi sirf testing ke liye
+    video phone/browser me download hoga.
+
+    Next step me isi jagah
+    Google Drive upload lagayenge.
+  */
+
+  const url =
+    URL.createObjectURL(blob);
+
+  const a =
+    document.createElement("a");
+
+  a.href = url;
+
+  a.download =
+    "video_" +
+    Date.now() +
+    ".webm";
+
+  a.click();
+
+  URL.revokeObjectURL(url);
+
+
+  status.textContent =
+    "✅ Video recording complete.";
+
+}
+
+
+/* =========================
+   SWITCH CAMERA
+========================= */
+
+switchBtn.addEventListener(
+  "click",
+  async () => {
+
+    if (recorder &&
+        recorder.state === "recording") {
+      return;
+    }
+
+    facingMode =
+      facingMode === "user"
+        ? "environment"
+        : "user";
+
+    await startCamera();
+
+  }
+);
+
+</script>
 
 </body>
 </html>
