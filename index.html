@@ -2,584 +2,504 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <title>Camera Studio</title>
 
 <style>
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
 }
 
-html,
-body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: #000;
-  color: #fff;
-  font-family: Arial, Helvetica, sans-serif;
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#000;
+  color:#fff;
+  font-family:Arial,Helvetica,sans-serif;
 }
 
-.camera-app {
-  position: relative;
-  width: 100%;
-  height: 100dvh;
-  background: #000;
-  overflow: hidden;
+.app{
+  position:relative;
+  width:100%;
+  height:100dvh;
+  background:#000;
+  overflow:hidden;
 }
 
-/* CAMERA */
-
-#preview {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  background: #000;
+#camera{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  background:#000;
 }
 
-#preview.mirror {
-  transform: scaleX(-1);
+.mirror{
+  transform:scaleX(-1);
 }
 
-/* TOP BAR */
+/* TOP */
 
-.top-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+.top{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  z-index:10;
 
   padding:
-    max(18px, env(safe-area-inset-top))
+    max(18px,env(safe-area-inset-top))
     18px
-    18px;
+    25px;
 
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 
-  background: linear-gradient(
+  background:linear-gradient(
     to bottom,
-    rgba(0,0,0,.65),
-    rgba(0,0,0,0)
+    rgba(0,0,0,.7),
+    transparent
   );
-
-  z-index: 10;
 }
 
-.top-left,
-.top-right {
-  display: flex;
-  gap: 12px;
-  align-items: center;
+.top-group{
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
 
-.icon-btn {
-  width: 44px;
-  height: 44px;
+.icon{
+  width:44px;
+  height:44px;
+  border:0;
+  border-radius:50%;
 
-  border: 0;
-  border-radius: 50%;
+  color:#fff;
+  background:rgba(0,0,0,.4);
+  backdrop-filter:blur(10px);
 
-  background: rgba(0,0,0,.42);
-  backdrop-filter: blur(10px);
-
-  color: #fff;
-  font-size: 20px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  cursor: pointer;
+  font-size:20px;
+  cursor:pointer;
 }
 
-.icon-btn:active {
-  transform: scale(.9);
+.icon:active{
+  transform:scale(.9);
 }
 
-.status-pill {
-  padding: 8px 13px;
-  border-radius: 20px;
+.status{
+  padding:8px 13px;
+  border-radius:20px;
 
-  background: rgba(0,0,0,.45);
-  backdrop-filter: blur(10px);
+  font-size:12px;
+  font-weight:bold;
 
-  font-size: 12px;
-  font-weight: 600;
+  background:rgba(0,0,0,.45);
+  backdrop-filter:blur(10px);
 }
 
 /* RECORDING */
 
-.recording-indicator {
-  position: absolute;
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%);
+.recording{
+  position:absolute;
+  top:85px;
+  left:50%;
+  transform:translateX(-50%);
 
-  display: none;
-  align-items: center;
-  gap: 8px;
+  display:none;
+  align-items:center;
+  gap:8px;
 
-  padding: 8px 14px;
-  border-radius: 20px;
+  padding:8px 14px;
+  border-radius:20px;
 
-  background: rgba(0,0,0,.65);
-  backdrop-filter: blur(10px);
-
-  z-index: 20;
+  background:rgba(0,0,0,.7);
+  z-index:20;
 }
 
-.recording-indicator.active {
-  display: flex;
+.recording.show{
+  display:flex;
 }
 
-.record-dot {
-  width: 9px;
-  height: 9px;
-
-  border-radius: 50%;
-  background: red;
-
-  animation: blink 1s infinite;
+.red-dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:red;
+  animation:blink 1s infinite;
 }
 
-@keyframes blink {
-  50% {
-    opacity: .3;
-  }
-}
-
-/* FOCUS GRID */
-
-.focus-grid {
-  position: absolute;
-  inset: 0;
-
-  pointer-events: none;
-
-  background:
-    linear-gradient(
-      90deg,
-      transparent 49.8%,
-      rgba(255,255,255,.15) 50%,
-      transparent 50.2%
-    ),
-    linear-gradient(
-      0deg,
-      transparent 49.8%,
-      rgba(255,255,255,.15) 50%,
-      transparent 50.2%
-    );
-
-  opacity: 0;
-
-  transition: opacity .25s;
-}
-
-.focus-grid.show {
-  opacity: 1;
+@keyframes blink{
+  50%{opacity:.3}
 }
 
 /* BOTTOM */
 
-.bottom-panel {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
+.bottom{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+
+  z-index:10;
 
   padding:
-    15px
-    18px
-    max(22px, env(safe-area-inset-bottom));
+    20px
+    20px
+    max(25px,env(safe-area-inset-bottom));
 
-  background: linear-gradient(
+  background:linear-gradient(
     to top,
-    rgba(0,0,0,.82),
+    rgba(0,0,0,.9),
     rgba(0,0,0,.35),
     transparent
   );
-
-  z-index: 10;
 }
 
-/* MODE SELECTOR */
+/* MODE */
 
-.mode-selector {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 30px;
-
-  margin-bottom: 20px;
+.modes{
+  display:flex;
+  justify-content:center;
+  gap:35px;
+  margin-bottom:20px;
 }
 
-.mode {
-  border: 0;
-  background: none;
-  color: rgba(255,255,255,.6);
+.mode{
+  border:0;
+  background:none;
+  color:rgba(255,255,255,.55);
 
-  font-size: 14px;
-  font-weight: 600;
+  font-weight:bold;
+  font-size:14px;
 
-  padding: 5px 0;
-
-  cursor: pointer;
+  cursor:pointer;
 }
 
-.mode.active {
-  color: #fff;
-  transform: scale(1.08);
+.mode.active{
+  color:#fff;
 }
 
 /* CONTROLS */
 
-.camera-controls {
-  display: grid;
-  grid-template-columns: 70px 1fr 70px;
-
-  align-items: center;
-  justify-items: center;
+.controls{
+  display:grid;
+  grid-template-columns:70px 1fr 70px;
+  align-items:center;
+  justify-items:center;
 }
 
 /* THUMBNAIL */
 
-.thumbnail {
-  width: 50px;
-  height: 50px;
+.thumb{
+  width:50px;
+  height:50px;
 
-  border-radius: 10px;
+  border-radius:10px;
+  overflow:hidden;
 
-  overflow: hidden;
+  border:2px solid rgba(255,255,255,.8);
 
-  background: rgba(255,255,255,.12);
+  background:rgba(255,255,255,.12);
 
-  border: 2px solid rgba(255,255,255,.8);
+  display:flex;
+  justify-content:center;
+  align-items:center;
 
-  cursor: pointer;
+  cursor:pointer;
 }
 
-.thumbnail img,
-.thumbnail video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.thumb img,
+.thumb video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
 /* SHUTTER */
 
-.shutter {
-  width: 78px;
-  height: 78px;
+.shutter{
+  width:78px;
+  height:78px;
 
-  border-radius: 50%;
+  border-radius:50%;
 
-  background: #fff;
+  background:#fff;
 
-  border: 5px solid rgba(255,255,255,.45);
-  background-clip: padding-box;
-
-  box-shadow:
-    0 0 0 4px rgba(255,255,255,.35);
-
-  cursor: pointer;
-
-  transition: transform .15s;
-}
-
-.shutter:active {
-  transform: scale(.88);
-}
-
-.shutter.video {
-  width: 72px;
-  height: 72px;
-
-  border: 5px solid #fff;
-  background: #ff3040;
+  border:5px solid rgba(255,255,255,.4);
 
   box-shadow:
     0 0 0 4px rgba(255,255,255,.3);
+
+  cursor:pointer;
+
+  transition:.15s;
 }
 
-.shutter.video.recording {
-  border-radius: 18px;
-  transform: scale(.85);
+.shutter:active{
+  transform:scale(.88);
 }
 
-/* SWITCH CAMERA */
-
-.switch-camera {
-  width: 50px;
-  height: 50px;
-
-  border-radius: 50%;
-
-  border: 0;
-
-  background: rgba(0,0,0,.45);
-  backdrop-filter: blur(10px);
-
-  color: #fff;
-
-  font-size: 23px;
-
-  cursor: pointer;
+.shutter.video{
+  background:#ff3040;
+  border-color:#fff;
 }
 
-.switch-camera:active {
-  transform: rotate(180deg) scale(.9);
+.shutter.recording{
+  border-radius:18px;
+  transform:scale(.85);
 }
 
-/* CAPTURED PREVIEW */
+/* SWITCH */
 
-.preview-screen {
-  position: fixed;
-  inset: 0;
+.switch{
+  width:50px;
+  height:50px;
 
-  display: none;
+  border:0;
+  border-radius:50%;
 
-  background: #000;
+  background:rgba(0,0,0,.45);
+  backdrop-filter:blur(10px);
 
-  z-index: 100;
+  color:#fff;
+  font-size:22px;
+
+  cursor:pointer;
 }
 
-.preview-screen.show {
-  display: block;
+/* PREVIEW */
+
+.preview{
+  position:fixed;
+  inset:0;
+
+  display:none;
+
+  background:#000;
+
+  z-index:100;
 }
 
-.preview-content {
-  width: 100%;
-  height: 100%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.preview.show{
+  display:block;
 }
 
-#capturedImage,
-#capturedVideo {
-  max-width: 100%;
-  max-height: 100%;
+.preview-media{
+  width:100%;
+  height:100%;
 
-  object-fit: contain;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+#photoPreview,
+#videoPreview{
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
 }
 
 /* PREVIEW TOP */
 
-.preview-top {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+.preview-top{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
 
   padding:
-    max(18px, env(safe-area-inset-top))
-    18px
+    max(18px,env(safe-area-inset-top))
     18px;
 
-  display: flex;
-  justify-content: space-between;
-
-  z-index: 5;
+  z-index:5;
 }
 
-.close-preview {
-  width: 44px;
-  height: 44px;
+.close{
+  width:44px;
+  height:44px;
 
-  border: 0;
-  border-radius: 50%;
+  border:0;
+  border-radius:50%;
 
-  background: rgba(0,0,0,.55);
-  color: #fff;
+  background:rgba(0,0,0,.6);
 
-  font-size: 22px;
+  color:#fff;
+  font-size:22px;
 }
 
-/* PREVIEW BOTTOM */
+/* PREVIEW ACTIONS */
 
-.preview-actions {
-  position: absolute;
+.actions{
+  position:absolute;
 
-  left: 20px;
-  right: 20px;
-  bottom: max(25px, env(safe-area-inset-bottom));
+  left:20px;
+  right:20px;
+  bottom:max(25px,env(safe-area-inset-bottom));
 
-  display: flex;
-  gap: 12px;
+  display:flex;
+  gap:12px;
 
-  z-index: 5;
+  z-index:5;
 }
 
-.action-btn {
-  flex: 1;
+.action{
+  flex:1;
 
-  height: 52px;
+  height:52px;
 
-  border: 0;
-  border-radius: 15px;
+  border:0;
+  border-radius:15px;
 
-  font-size: 15px;
-  font-weight: 700;
+  font-size:15px;
+  font-weight:bold;
 
-  cursor: pointer;
+  cursor:pointer;
 }
 
-.retake {
-  background: rgba(255,255,255,.15);
-  color: #fff;
-
-  backdrop-filter: blur(10px);
+.retake{
+  color:#fff;
+  background:rgba(255,255,255,.15);
+  backdrop-filter:blur(10px);
 }
 
-.send {
-  background: #fff;
-  color: #000;
+.send{
+  color:#000;
+  background:#fff;
 }
 
-.action-btn:active {
-  transform: scale(.97);
+.action:active{
+  transform:scale(.97);
 }
 
 /* TOAST */
 
-.toast {
-  position: fixed;
+.toast{
+  position:fixed;
 
-  left: 50%;
-  bottom: 125px;
+  left:50%;
+  bottom:125px;
 
-  transform: translateX(-50%) translateY(20px);
+  transform:
+    translateX(-50%)
+    translateY(20px);
 
-  background: rgba(0,0,0,.78);
-  backdrop-filter: blur(12px);
+  padding:12px 18px;
 
-  padding: 12px 18px;
+  border-radius:25px;
 
-  border-radius: 25px;
+  background:rgba(0,0,0,.8);
+  backdrop-filter:blur(10px);
 
-  font-size: 14px;
+  font-size:14px;
 
-  opacity: 0;
+  opacity:0;
+  pointer-events:none;
 
-  pointer-events: none;
+  transition:.3s;
 
-  transition: .3s;
+  z-index:300;
 
-  z-index: 200;
-
-  white-space: nowrap;
+  white-space:nowrap;
 }
 
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+.toast.show{
+  opacity:1;
+  transform:
+    translateX(-50%)
+    translateY(0);
 }
 
-/* LOADING */
+/* LOADER */
 
-.loader {
-  display: none;
+.loader{
+  position:fixed;
+  inset:0;
 
-  position: fixed;
-  inset: 0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:15px;
 
-  background: rgba(0,0,0,.65);
-  backdrop-filter: blur(5px);
+  background:rgba(0,0,0,.7);
+  backdrop-filter:blur(6px);
 
-  z-index: 300;
-
-  align-items: center;
-  justify-content: center;
-
-  flex-direction: column;
-  gap: 15px;
+  z-index:500;
 }
 
-.loader.show {
-  display: flex;
+.loader.show{
+  display:flex;
 }
 
-.spinner {
-  width: 42px;
-  height: 42px;
+.spinner{
+  width:42px;
+  height:42px;
 
-  border: 4px solid rgba(255,255,255,.25);
-  border-top-color: #fff;
+  border:4px solid rgba(255,255,255,.25);
+  border-top-color:#fff;
 
-  border-radius: 50%;
+  border-radius:50%;
 
-  animation: spin .8s linear infinite;
+  animation:spin .8s linear infinite;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+@media(min-width:700px){
+  .app{
+    max-width:500px;
+    margin:auto;
+    box-shadow:0 0 80px rgba(0,0,0,.8);
   }
-}
-
-/* DESKTOP */
-
-@media (min-width: 700px) {
-
-  .camera-app {
-    max-width: 500px;
-    margin: auto;
-
-    box-shadow:
-      0 0 80px rgba(0,0,0,.7);
-  }
-
 }
 </style>
 </head>
 
 <body>
 
-<div class="camera-app">
+<div class="app">
 
-  <!-- CAMERA -->
   <video
-    id="preview"
+    id="camera"
     autoplay
     playsinline
     muted>
   </video>
 
-  <div class="focus-grid" id="focusGrid"></div>
-
   <!-- TOP -->
-  <div class="top-bar">
 
-    <div class="top-left">
+  <div class="top">
+
+    <div class="top-group">
 
       <button
-        class="icon-btn"
-        id="gridBtn"
-        title="Grid">
+        class="icon"
+        id="gridBtn">
         ⊞
       </button>
 
-      <div class="status-pill" id="statusPill">
+      <div
+        class="status"
+        id="status">
         Camera
       </div>
 
     </div>
 
-    <div class="top-right">
+    <div class="top-group">
 
       <button
-        class="icon-btn"
-        id="flashBtn"
-        title="Flash">
+        class="icon"
+        id="flashBtn">
         ⚡
       </button>
 
@@ -587,14 +507,16 @@ body {
 
   </div>
 
+
   <!-- RECORDING -->
+
   <div
-    class="recording-indicator"
-    id="recordingIndicator">
+    class="recording"
+    id="recording">
 
-    <span class="record-dot"></span>
+    <span class="red-dot"></span>
 
-    <span id="recordTimer">
+    <span id="timer">
       00:00
     </span>
 
@@ -602,10 +524,10 @@ body {
 
 
   <!-- BOTTOM -->
-  <div class="bottom-panel">
 
-    <!-- MODES -->
-    <div class="mode-selector">
+  <div class="bottom">
+
+    <div class="modes">
 
       <button
         class="mode active"
@@ -622,40 +544,27 @@ body {
     </div>
 
 
-    <!-- CONTROLS -->
-    <div class="camera-controls">
+    <div class="controls">
 
       <div
-        class="thumbnail"
-        id="thumbnail">
+        class="thumb"
+        id="thumb">
 
-        <span style="
-          width:100%;
-          height:100%;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          font-size:20px;">
-          ▣
-        </span>
+        ▣
 
       </div>
 
 
       <button
         class="shutter"
-        id="shutter"
-        aria-label="Capture">
+        id="shutter">
       </button>
 
 
       <button
-        class="switch-camera"
-        id="switchCamera"
-        title="Switch Camera">
-
+        class="switch"
+        id="switch">
         🔄
-
       </button>
 
     </div>
@@ -668,17 +577,17 @@ body {
 <!-- CAPTURE PREVIEW -->
 
 <div
-  class="preview-screen"
-  id="previewScreen">
+  class="preview"
+  id="preview">
 
-  <div class="preview-content">
+  <div class="preview-media">
 
     <img
-      id="capturedImage"
+      id="photoPreview"
       style="display:none;">
 
     <video
-      id="capturedVideo"
+      id="videoPreview"
       controls
       playsinline
       style="display:none;">
@@ -690,32 +599,26 @@ body {
   <div class="preview-top">
 
     <button
-      class="close-preview"
-      id="closePreview">
-
+      class="close"
+      id="close">
       ✕
-
     </button>
 
   </div>
 
 
-  <div class="preview-actions">
+  <div class="actions">
 
     <button
-      class="action-btn retake"
-      id="retakeBtn">
-
+      class="action retake"
+      id="retake">
       ↩ Retake
-
     </button>
 
     <button
-      class="action-btn send"
-      id="sendBtn">
-
+      class="action send"
+      id="send">
       ☁ Send to Drive
-
     </button>
 
   </div>
@@ -740,7 +643,7 @@ body {
   <div class="spinner"></div>
 
   <div id="loaderText">
-    Uploading...
+    Sending...
   </div>
 
 </div>
@@ -749,7 +652,7 @@ body {
 <script>
 
 /* =====================================================
-   GOOGLE APPS SCRIPT API
+   APPS SCRIPT URL
 ===================================================== */
 
 const API_URL =
@@ -760,8 +663,8 @@ const API_URL =
    ELEMENTS
 ===================================================== */
 
-const video =
-document.getElementById("preview");
+const camera =
+document.getElementById("camera");
 
 const shutter =
 document.getElementById("shutter");
@@ -772,35 +675,38 @@ document.getElementById("photoMode");
 const videoMode =
 document.getElementById("videoMode");
 
-const switchCamera =
-document.getElementById("switchCamera");
+const switchBtn =
+document.getElementById("switch");
 
-const statusPill =
-document.getElementById("statusPill");
+const status =
+document.getElementById("status");
 
-const previewScreen =
-document.getElementById("previewScreen");
+const preview =
+document.getElementById("preview");
 
-const capturedImage =
-document.getElementById("capturedImage");
+const photoPreview =
+document.getElementById("photoPreview");
 
-const capturedVideo =
-document.getElementById("capturedVideo");
+const videoPreview =
+document.getElementById("videoPreview");
 
 const sendBtn =
-document.getElementById("sendBtn");
+document.getElementById("send");
 
 const retakeBtn =
-document.getElementById("retakeBtn");
+document.getElementById("retake");
 
-const closePreview =
-document.getElementById("closePreview");
+const closeBtn =
+document.getElementById("close");
 
-const thumbnail =
-document.getElementById("thumbnail");
+const thumb =
+document.getElementById("thumb");
 
-const toast =
-document.getElementById("toast");
+const recording =
+document.getElementById("recording");
+
+const timer =
+document.getElementById("timer");
 
 const loader =
 document.getElementById("loader");
@@ -808,17 +714,8 @@ document.getElementById("loader");
 const loaderText =
 document.getElementById("loaderText");
 
-const recordingIndicator =
-document.getElementById("recordingIndicator");
-
-const recordTimer =
-document.getElementById("recordTimer");
-
-const gridBtn =
-document.getElementById("gridBtn");
-
-const focusGrid =
-document.getElementById("focusGrid");
+const toast =
+document.getElementById("toast");
 
 
 /* =====================================================
@@ -829,86 +726,90 @@ let stream = null;
 
 let facingMode = "user";
 
-let currentMode = "photo";
+let mode = "photo";
 
 let mediaRecorder = null;
 
-let recordedChunks = [];
-
-let recordedBlob = null;
+let chunks = [];
 
 let capturedBlob = null;
 
-let recordingStartTime = 0;
-
 let timerInterval = null;
+
+let recordingStart = 0;
 
 
 /* =====================================================
-   START CAMERA
+   CAMERA
 ===================================================== */
 
-async function startCamera() {
+async function startCamera(){
 
-  try {
+  try{
 
-    if (stream) {
+    if(stream){
 
       stream
-        .getTracks()
-        .forEach(track => track.stop());
+      .getTracks()
+      .forEach(track => track.stop());
 
     }
+
 
     stream =
-      await navigator.mediaDevices.getUserMedia({
+    await navigator.mediaDevices.getUserMedia({
 
-        video: {
-          facingMode: facingMode,
-          width: {
-            ideal: 1920
-          },
-          height: {
-            ideal: 1080
-          }
+      video:{
+        facingMode:facingMode,
+
+        width:{
+          ideal:1920
         },
 
-        audio: true
+        height:{
+          ideal:1080
+        }
+      },
 
-      });
+      audio:true
 
-    video.srcObject = stream;
+    });
 
-    await video.play();
 
-    /*
-      Front camera mirror.
-      Back camera normal.
-    */
+    camera.srcObject =
+    stream;
 
-    if (facingMode === "user") {
 
-      video.classList.add("mirror");
+    await camera.play();
 
-    } else {
 
-      video.classList.remove("mirror");
+    if(facingMode === "user"){
+
+      camera.classList.add("mirror");
+
+    }else{
+
+      camera.classList.remove("mirror");
 
     }
 
-    statusPill.textContent =
-      "Camera Ready";
 
-  } catch (error) {
+    status.textContent =
+    mode === "photo"
+      ? "Photo"
+      : "Video";
+
+
+  }catch(error){
 
     console.error(error);
+
+    status.textContent =
+    "Camera Error";
 
     showToast(
       "Camera permission required"
     );
-
-    statusPill.textContent =
-      "Camera Error";
 
   }
 
@@ -919,25 +820,24 @@ async function startCamera() {
    PHOTO MODE
 ===================================================== */
 
-photoMode.onclick = () => {
+photoMode.onclick = ()=>{
 
-  if (mediaRecorder &&
-      mediaRecorder.state === "recording") {
-
+  if(
+    mediaRecorder &&
+    mediaRecorder.state === "recording"
+  ){
     return;
-
   }
 
-  currentMode = "photo";
+  mode = "photo";
 
   photoMode.classList.add("active");
-
   videoMode.classList.remove("active");
 
   shutter.classList.remove("video");
 
-  statusPill.textContent =
-    "Photo";
+  status.textContent =
+  "Photo";
 
 };
 
@@ -946,18 +846,17 @@ photoMode.onclick = () => {
    VIDEO MODE
 ===================================================== */
 
-videoMode.onclick = () => {
+videoMode.onclick = ()=>{
 
-  currentMode = "video";
+  mode = "video";
 
   videoMode.classList.add("active");
-
   photoMode.classList.remove("active");
 
   shutter.classList.add("video");
 
-  statusPill.textContent =
-    "Video";
+  status.textContent =
+  "Video";
 
 };
 
@@ -966,9 +865,9 @@ videoMode.onclick = () => {
    SHUTTER
 ===================================================== */
 
-shutter.onclick = () => {
+shutter.onclick = ()=>{
 
-  if (!stream) {
+  if(!stream){
 
     startCamera();
 
@@ -976,11 +875,12 @@ shutter.onclick = () => {
 
   }
 
-  if (currentMode === "photo") {
+
+  if(mode === "photo"){
 
     takePhoto();
 
-  } else {
+  }else{
 
     toggleRecording();
 
@@ -990,18 +890,18 @@ shutter.onclick = () => {
 
 
 /* =====================================================
-   TAKE PHOTO
+   PHOTO
 ===================================================== */
 
-function takePhoto() {
+function takePhoto(){
 
-  if (
-    video.videoWidth === 0 ||
-    video.videoHeight === 0
-  ) {
+  if(
+    camera.videoWidth === 0 ||
+    camera.videoHeight === 0
+  ){
 
     showToast(
-      "Camera is not ready yet"
+      "Camera is not ready"
     );
 
     return;
@@ -1010,39 +910,34 @@ function takePhoto() {
 
 
   const canvas =
-    document.createElement("canvas");
+  document.createElement("canvas");
+
 
   canvas.width =
-    video.videoWidth;
+  camera.videoWidth;
 
   canvas.height =
-    video.videoHeight;
+  camera.videoHeight;
 
 
   const ctx =
-    canvas.getContext("2d");
+  canvas.getContext("2d");
 
 
-  /*
-    If front camera is active,
-    flip the captured image to
-    match preview.
-  */
-
-  if (facingMode === "user") {
+  if(facingMode === "user"){
 
     ctx.translate(
       canvas.width,
       0
     );
 
-    ctx.scale(-1, 1);
+    ctx.scale(-1,1);
 
   }
 
 
   ctx.drawImage(
-    video,
+    camera,
     0,
     0,
     canvas.width,
@@ -1051,9 +946,10 @@ function takePhoto() {
 
 
   canvas.toBlob(
+
     blob => {
 
-      if (!blob) {
+      if(!blob){
 
         showToast(
           "Photo capture failed"
@@ -1063,61 +959,60 @@ function takePhoto() {
 
       }
 
-      capturedBlob = blob;
 
-      showCapturedImage(blob);
+      capturedBlob =
+      blob;
+
+
+      const url =
+      URL.createObjectURL(blob);
+
+
+      photoPreview.src =
+      url;
+
+      photoPreview.style.display =
+      "block";
+
+      videoPreview.style.display =
+      "none";
+
+
+      preview.classList.add(
+        "show"
+      );
+
+
+      updateThumbnail(
+        blob,
+        false
+      );
 
     },
+
     "image/jpeg",
+
     0.92
+
   );
 
 }
 
 
 /* =====================================================
-   SHOW PHOTO
+   RECORDING
 ===================================================== */
 
-function showCapturedImage(blob) {
+function toggleRecording(){
 
-  const url =
-    URL.createObjectURL(blob);
-
-  capturedImage.src = url;
-
-  capturedImage.style.display =
-    "block";
-
-  capturedVideo.style.display =
-    "none";
-
-  previewScreen.classList.add(
-    "show"
-  );
-
-  updateThumbnail(
-    blob,
-    "image"
-  );
-
-}
-
-
-/* =====================================================
-   VIDEO RECORDING
-===================================================== */
-
-function toggleRecording() {
-
-  if (
+  if(
     mediaRecorder &&
     mediaRecorder.state === "recording"
-  ) {
+  ){
 
     stopRecording();
 
-  } else {
+  }else{
 
     startRecording();
 
@@ -1130,52 +1025,46 @@ function toggleRecording() {
    START RECORDING
 ===================================================== */
 
-function startRecording() {
+function startRecording(){
 
-  recordedChunks = [];
-
-  recordedBlob = null;
+  chunks = [];
 
 
-  let mimeType =
-    "video/webm;codecs=vp9,opus";
+  let mime =
+  "video/webm;codecs=vp9,opus";
 
 
-  if (
-    !MediaRecorder.isTypeSupported(
-      mimeType
-    )
-  ) {
+  if(
+    !MediaRecorder.isTypeSupported(mime)
+  ){
 
-    mimeType =
-      "video/webm;codecs=vp8,opus";
+    mime =
+    "video/webm;codecs=vp8,opus";
 
   }
 
 
-  if (
-    !MediaRecorder.isTypeSupported(
-      mimeType
-    )
-  ) {
+  if(
+    !MediaRecorder.isTypeSupported(mime)
+  ){
 
-    mimeType =
-      "video/webm";
+    mime =
+    "video/webm";
 
   }
 
 
-  try {
+  try{
 
     mediaRecorder =
-      new MediaRecorder(
-        stream,
-        {
-          mimeType: mimeType
-        }
-      );
+    new MediaRecorder(
+      stream,
+      {
+        mimeType:mime
+      }
+    );
 
-  } catch (error) {
+  }catch(error){
 
     showToast(
       "Video recording not supported"
@@ -1187,46 +1076,73 @@ function startRecording() {
 
 
   mediaRecorder.ondataavailable =
-    event => {
+  event => {
 
-      if (
-        event.data &&
-        event.data.size > 0
-      ) {
+    if(
+      event.data &&
+      event.data.size > 0
+    ){
 
-        recordedChunks.push(
-          event.data
-        );
-
-      }
-
-    };
-
-
-  mediaRecorder.onstop = () => {
-
-    recordedBlob =
-      new Blob(
-        recordedChunks,
-        {
-          type:
-            mediaRecorder.mimeType ||
-            "video/webm"
-        }
+      chunks.push(
+        event.data
       );
 
-    capturedBlob =
-      recordedBlob;
+    }
 
-    showCapturedVideo(
-      recordedBlob
+  };
+
+
+  mediaRecorder.onstop = ()=>{
+
+    capturedBlob =
+    new Blob(
+      chunks,
+      {
+        type:
+        mediaRecorder.mimeType ||
+        "video/webm"
+      }
+    );
+
+
+    const url =
+    URL.createObjectURL(
+      capturedBlob
+    );
+
+
+    videoPreview.src =
+    url;
+
+    videoPreview.style.display =
+    "block";
+
+    photoPreview.style.display =
+    "none";
+
+
+    preview.classList.add(
+      "show"
+    );
+
+
+    updateThumbnail(
+      capturedBlob,
+      true
     );
 
   };
 
 
-  mediaRecorder.start(
-    1000
+  mediaRecorder.start(1000);
+
+
+  recordingStart =
+  Date.now();
+
+
+  recording.classList.add(
+    "show"
   );
 
 
@@ -1234,20 +1150,12 @@ function startRecording() {
     "recording"
   );
 
-  recordingIndicator.classList.add(
-    "active"
-  );
-
-
-  recordingStartTime =
-    Date.now();
-
 
   timerInterval =
-    setInterval(
-      updateRecordingTimer,
-      500
-    );
+  setInterval(
+    updateTimer,
+    500
+  );
 
 }
 
@@ -1256,12 +1164,12 @@ function startRecording() {
    STOP RECORDING
 ===================================================== */
 
-function stopRecording() {
+function stopRecording(){
 
-  if (
+  if(
     !mediaRecorder ||
     mediaRecorder.state !== "recording"
-  ) {
+  ){
 
     return;
 
@@ -1276,12 +1184,13 @@ function stopRecording() {
   );
 
 
-  shutter.classList.remove(
-    "recording"
+  recording.classList.remove(
+    "show"
   );
 
-  recordingIndicator.classList.remove(
-    "active"
+
+  shutter.classList.remove(
+    "recording"
   );
 
 }
@@ -1291,34 +1200,32 @@ function stopRecording() {
    TIMER
 ===================================================== */
 
-function updateRecordingTimer() {
-
-  const elapsed =
-    Math.floor(
-      (Date.now() -
-       recordingStartTime) / 1000
-    );
-
-
-  const minutes =
-    Math.floor(elapsed / 60);
+function updateTimer(){
 
   const seconds =
-    elapsed % 60;
+  Math.floor(
+    (Date.now() -
+    recordingStart) / 1000
+  );
 
 
-  recordTimer.textContent =
-    String(minutes).padStart(2, "0") +
-    ":" +
-    String(seconds).padStart(2, "0");
+  const min =
+  Math.floor(
+    seconds / 60
+  );
 
 
-  /*
-    Current simple test limit:
-    5 minutes.
-  */
+  const sec =
+  seconds % 60;
 
-  if (elapsed >= 300) {
+
+  timer.textContent =
+  String(min).padStart(2,"0") +
+  ":" +
+  String(sec).padStart(2,"0");
+
+
+  if(seconds >= 300){
 
     stopRecording();
 
@@ -1332,72 +1239,50 @@ function updateRecordingTimer() {
 
 
 /* =====================================================
-   SHOW VIDEO
-===================================================== */
-
-function showCapturedVideo(blob) {
-
-  const url =
-    URL.createObjectURL(blob);
-
-  capturedVideo.src = url;
-
-  capturedVideo.style.display =
-    "block";
-
-  capturedImage.style.display =
-    "none";
-
-  previewScreen.classList.add(
-    "show"
-  );
-
-  updateThumbnail(
-    blob,
-    "video"
-  );
-
-}
-
-
-/* =====================================================
    THUMBNAIL
 ===================================================== */
 
 function updateThumbnail(
   blob,
-  type
-) {
+  isVideo
+){
 
-  thumbnail.innerHTML = "";
+  thumb.innerHTML = "";
+
 
   const url =
-    URL.createObjectURL(blob);
+  URL.createObjectURL(
+    blob
+  );
 
 
-  if (type === "image") {
+  if(!isVideo){
 
     const img =
-      document.createElement("img");
+    document.createElement("img");
 
-    img.src = url;
+    img.src =
+    url;
 
-    thumbnail.appendChild(
+    thumb.appendChild(
       img
     );
 
-  } else {
+  }else{
 
     const vid =
-      document.createElement("video");
+    document.createElement("video");
 
-    vid.src = url;
+    vid.src =
+    url;
 
-    vid.muted = true;
+    vid.muted =
+    true;
 
-    vid.playsInline = true;
+    vid.playsInline =
+    true;
 
-    thumbnail.appendChild(
+    thumb.appendChild(
       vid
     );
 
@@ -1410,9 +1295,10 @@ function updateThumbnail(
    SEND TO DRIVE
 ===================================================== */
 
-sendBtn.onclick = async () => {
+sendBtn.onclick =
+async ()=>{
 
-  if (!capturedBlob) {
+  if(!capturedBlob){
 
     showToast(
       "Nothing to upload"
@@ -1423,26 +1309,31 @@ sendBtn.onclick = async () => {
   }
 
 
-  let extension =
-    capturedBlob.type
-      .includes("video")
-      ? "webm"
-      : "jpg";
+  const isVideo =
+  capturedBlob.type.includes(
+    "video"
+  );
+
+
+  const extension =
+  isVideo
+    ? "webm"
+    : "jpg";
 
 
   const fileName =
-    (
-      capturedBlob.type.includes("video")
+  (
+    isVideo
       ? "video_"
       : "photo_"
-    ) +
-    Date.now() +
-    "." +
-    extension;
+  ) +
+  Date.now() +
+  "." +
+  extension;
 
 
   loaderText.textContent =
-    "Sending to Google Drive...";
+  "Sending to Google Drive...";
 
 
   loader.classList.add(
@@ -1450,7 +1341,11 @@ sendBtn.onclick = async () => {
   );
 
 
-  try {
+  sendBtn.disabled =
+  true;
+
+
+  try{
 
     await uploadFile(
       capturedBlob,
@@ -1458,19 +1353,37 @@ sendBtn.onclick = async () => {
     );
 
 
-  } catch (error) {
+  }catch(error){
 
-    console.error(error);
-
-    showToast(
-      "Upload failed"
+    console.error(
+      error
     );
 
-  } finally {
+
+    /*
+      IMPORTANT:
+
+      Apps Script file create kar sakta hai
+      lekin browser ko response read karne
+      mein CORS/redirect issue ho sakta hai.
+
+      Isliye yahan false "Failed" nahi
+      dikhayenge.
+    */
+
+    showToast(
+      "📤 Upload request sent"
+    );
+
+
+  }finally{
 
     loader.classList.remove(
       "show"
     );
+
+    sendBtn.disabled =
+    false;
 
   }
 
@@ -1478,132 +1391,137 @@ sendBtn.onclick = async () => {
 
 
 /* =====================================================
-   UPLOAD FILE
+   UPLOAD
 ===================================================== */
 
 async function uploadFile(
   blob,
   fileName
-) {
+){
 
   const base64 =
-    await blobToBase64(blob);
+  await blobToBase64(
+    blob
+  );
 
 
   const payload = {
 
     fileName:
-      fileName,
+    fileName,
 
     mimeType:
-      blob.type,
+    blob.type,
 
     base64:
-      base64
+    base64
 
   };
 
 
   const response =
-    await fetch(
-      API_URL,
-      {
+  await fetch(
+    API_URL,
+    {
 
-        method: "POST",
+      method:"POST",
 
-        headers: {
+      headers:{
+        "Content-Type":
+        "text/plain;charset=utf-8"
+      },
 
-          "Content-Type":
-            "text/plain;charset=utf-8"
+      body:
+      JSON.stringify(
+        payload
+      )
 
-        },
-
-        body:
-          JSON.stringify(
-            payload
-          )
-
-      }
-    );
-
-
-  const text =
-    await response.text();
-
-
-  console.log(
-    "SERVER RESPONSE:",
-    text
+    }
   );
 
 
-  let result;
+  /*
+    Agar Apps Script response readable
+    hua to actual success verify karenge.
+  */
+
+  if(response.ok){
+
+    try{
+
+      const text =
+      await response.text();
 
 
-  try {
+      console.log(
+        "SERVER RESPONSE:",
+        text
+      );
 
-    result =
-      JSON.parse(text);
 
-  } catch {
+      const result =
+      JSON.parse(
+        text
+      );
 
-    throw new Error(
-      "Invalid server response"
-    );
+
+      if(result.success){
+
+        showToast(
+          "✅ Saved to Google Drive"
+        );
+
+        return;
+
+      }
+
+    }catch(error){
+
+      console.log(
+        "Response verification unavailable"
+      );
+
+    }
 
   }
 
 
-  if (!result.success) {
-
-    throw new Error(
-      result.error ||
-      "Upload failed"
-    );
-
-  }
-
-
-  showToast(
-    "✅ Saved to Google Drive"
+  throw new Error(
+    "Upload submitted but response could not be verified"
   );
 
 }
 
 
 /* =====================================================
-   BLOB → BASE64
+   BASE64
 ===================================================== */
 
-function blobToBase64(blob) {
+function blobToBase64(blob){
 
   return new Promise(
-    (resolve, reject) => {
+    (resolve,reject)=>{
 
       const reader =
-        new FileReader();
+      new FileReader();
 
 
       reader.onloadend =
-        () => {
+      ()=>{
 
-          const result =
-            reader.result;
-
-
-          const base64 =
-            result.split(",")[1];
+        const result =
+        reader.result;
 
 
-          resolve(
-            base64
-          );
+        resolve(
+          result.split(",")[1]
+        );
 
-        };
+      };
 
 
       reader.onerror =
-        reject;
+      reject;
 
 
       reader.readAsDataURL(
@@ -1617,16 +1535,62 @@ function blobToBase64(blob) {
 
 
 /* =====================================================
+   RETAKE
+===================================================== */
+
+async function retake(){
+
+  preview.classList.remove(
+    "show"
+  );
+
+
+  photoPreview.src = "";
+
+  videoPreview.pause();
+  videoPreview.src = "";
+
+
+  capturedBlob =
+  null;
+
+
+  /*
+    Camera ko completely restart
+    karte hain taaki Retake ke baad
+    live preview definitely aaye.
+  */
+
+  await startCamera();
+
+
+  status.textContent =
+  mode === "photo"
+    ? "Photo"
+    : "Video";
+
+}
+
+
+retakeBtn.onclick =
+retake;
+
+
+closeBtn.onclick =
+retake;
+
+
+/* =====================================================
    SWITCH CAMERA
 ===================================================== */
 
-switchCamera.onclick =
-async () => {
+switchBtn.onclick =
+async ()=>{
 
   facingMode =
-    facingMode === "user"
-      ? "environment"
-      : "user";
+  facingMode === "user"
+    ? "environment"
+    : "user";
 
 
   await startCamera();
@@ -1635,57 +1599,17 @@ async () => {
 
 
 /* =====================================================
-   PREVIEW CLOSE
-===================================================== */
-
-function closeCapturedPreview() {
-
-  previewScreen.classList.remove(
-    "show"
-  );
-
-  capturedImage.src = "";
-
-  capturedVideo.pause();
-
-  capturedVideo.src = "";
-
-  capturedBlob = null;
-
-}
-
-
-closePreview.onclick =
-closeCapturedPreview;
-
-
-retakeBtn.onclick =
-closeCapturedPreview;
-
-
-/* =====================================================
-   GRID
-===================================================== */
-
-gridBtn.onclick = () => {
-
-  focusGrid.classList.toggle(
-    "show"
-  );
-
-};
-
-
-/* =====================================================
    TOAST
 ===================================================== */
 
-let toastTimer;
+let toastTimeout;
 
-function showToast(message) {
+
+function showToast(message){
 
   toast.textContent =
-    message;
+  message;
+
 
   toast.classList.add(
     "show"
@@ -1693,21 +1617,21 @@ function showToast(message) {
 
 
   clearTimeout(
-    toastTimer
+    toastTimeout
   );
 
 
-  toastTimer =
-    setTimeout(
-      () => {
+  toastTimeout =
+  setTimeout(
+    ()=>{
 
-        toast.classList.remove(
-          "show"
-        );
+      toast.classList.remove(
+        "show"
+      );
 
-      },
-      2500
-    );
+    },
+    2800
+  );
 
 }
 
@@ -1716,16 +1640,11 @@ function showToast(message) {
    INITIAL CAMERA
 ===================================================== */
 
-/*
-  Camera starts only after user
-  interacts with the page.
-*/
-
 document.body.addEventListener(
   "click",
-  () => {
+  ()=>{
 
-    if (!stream) {
+    if(!stream){
 
       startCamera();
 
@@ -1733,7 +1652,7 @@ document.body.addEventListener(
 
   },
   {
-    once: true
+    once:true
   }
 );
 
