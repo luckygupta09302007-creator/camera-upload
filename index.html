@@ -1,15 +1,3 @@
-Niche aapka complete, pure tarike se corrected **`index.html`** code diya gaya hai. 
-
-Isme aapki existing UI, animations, camera interface, layouts, modes aur switches ko bina koi badlav kiye **Drive upload aur loading system** ko fully robust aur error-proof bana diya gaya hai.
-
-### Kya-Kya Fix Kiya Gaya Hai:
-1. **No Infinite Loading:** `AbortController` ke saath **60-second** ka hard timeout lagaya hai, jisse loader kabhi bhi freeze nahi hoga.
-2. **CORS/Redirect Handle:** Google Apps Script ke redirect behavior ke kaaran hone wale browser limitations ko analyze karke user-friendly messages set kiye hain.
-3. **Loader Safety (`finally` block):** Kisi bhi condition me (Success, Fail ya Timeout) loader automatically band ho jayega aur button enable ho jayega.
-4. **Error Mapping:** Aapke bataye hue sabhi conditions (Success, Redirect/CORS, Timeout aur Offline Network Error) ke accurate toasts map kar diye hain.
-
-Aap is code ko direct replace karke use kar sakte hain:
-
 ```html
 <!DOCTYPE html>
 <html lang="en">
