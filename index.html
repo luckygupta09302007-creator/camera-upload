@@ -1,171 +1,809 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Camera Studio — Premium</title>
-  <meta name="description" content="Camera Studio — upgrade to Premium for higher quality uploads, automatic cloud backup, and advanced editing." />
-  <style>
-    :root{
-      --bg:#080710;
-      --card:#0e0f17;
-      --muted:#9aa0b4;
-      --accent:#6b8cff;
-      --glass:rgba(255,255,255,0.04);
-      --radius:14px;
-      color-scheme: dark;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#05040a 0%, #0b0d13 100%);color:#eef2ff;line-height:1.4}
-    .container{max-width:1100px;margin:0 auto;padding:32px}
-    header{display:flex;align-items:center;justify-content:space-between;padding:18px 0}
-    .brand{display:flex;gap:12px;align-items:center}
-    .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#8de0ff);display:flex;align-items:center;justify-content:center;font-weight:700;color:#042;box-shadow:0 6px 20px rgba(107,140,255,0.15)}
-    .brand h1{font-size:16px;margin:0}
-    nav{display:flex;gap:18px;align-items:center}
-    a.btn{background:var(--accent);color:#08102b;padding:10px 16px;border-radius:10px;text-decoration:none;font-weight:700}
-    a.ghost{color:var(--muted);text-decoration:none;padding:8px 12px;border-radius:8px}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Camera Studio</title>
 
-    .hero{display:grid;grid-template-columns:1fr 420px;gap:32px;align-items:center;padding:40px 0}
-    .hero-left h2{font-size:36px;margin:0 0 12px}
-    .sub{color:var(--muted);margin-bottom:20px}
-    .cta-row{display:flex;gap:12px}
-    .cta-primary{background:var(--accent);color:#041; padding:12px 18px;border-radius:12px;text-decoration:none;font-weight:800}
-    .cta-secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);padding:10px 14px;border-radius:12px;text-decoration:none}
+<style>
+*{box-sizing:border-box}
 
-    .hero-right{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:16px;padding:18px;box-shadow:inset 0 -6px 30px rgba(0,0,0,0.6)}
-    .mock{height:360px;border-radius:12px;background:linear-gradient(135deg,#08102b,#0b1624);display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:700}
+body{
+margin:0;
+background:#000;
+color:#fff;
+font-family:Arial,sans-serif;
+height:100vh;
+overflow:hidden;
+}
 
-    .features{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:36px}
-    .feature{background:var(--card);padding:18px;border-radius:12px}
-    .feature h4{margin:0 0 8px}
-    .feature p{margin:0;color:var(--muted);font-size:14px}
+.camera-app{
+height:100vh;
+width:100%;
+position:relative;
+background:#000;
+}
 
-    .pricing{margin-top:44px;display:flex;gap:18px}
-    .plan{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:20px;border-radius:14px;flex:1}
-    .plan h3{margin:0 0 8px}
-    .price{font-size:28px;font-weight:800;margin:8px 0}
-    .plan ul{margin:12px 0 18px;padding-left:18px;color:var(--muted)}
-    .plan button{width:100%;padding:12px;border-radius:10px;border:0;background:var(--accent);color:#041;font-weight:800;cursor:pointer}
+video{
+position:absolute;
+inset:0;
+width:100%;
+height:100%;
+object-fit:cover;
+background:#000;
+}
 
-    footer{margin-top:60px;padding:28px 0;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
-    .small{font-size:13px;color:var(--muted)}
+.top{
+position:absolute;
+top:0;
+left:0;
+right:0;
+z-index:5;
+padding:22px 20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:linear-gradient(to bottom,rgba(0,0,0,.65),transparent);
+}
 
-    @media (max-width:900px){
-      .hero{grid-template-columns:1fr;gap:18px}
-      .features{grid-template-columns:1fr}
-      .pricing{flex-direction:column}
-      .hero-right{order: -1}
-    }
-  </style>
+.title{
+font-size:18px;
+font-weight:700;
+}
+
+.status{
+font-size:12px;
+opacity:.8;
+}
+
+.recording{
+position:absolute;
+top:75px;
+left:50%;
+transform:translateX(-50%);
+z-index:10;
+background:rgba(0,0,0,.75);
+padding:8px 14px;
+border-radius:20px;
+display:none;
+align-items:center;
+gap:8px;
+font-size:14px;
+font-weight:bold;
+}
+
+.recording.show{
+display:flex;
+}
+
+.dot{
+width:9px;
+height:9px;
+border-radius:50%;
+background:#ff3040;
+animation:blink 1s infinite;
+}
+
+@keyframes blink{
+50%{opacity:.3}
+}
+
+.bottom{
+position:absolute;
+bottom:0;
+left:0;
+right:0;
+z-index:5;
+padding:20px 20px 30px;
+background:linear-gradient(transparent,rgba(0,0,0,.85));
+}
+
+.modes{
+display:flex;
+justify-content:center;
+gap:35px;
+margin-bottom:22px;
+}
+
+.mode{
+border:0;
+background:none;
+color:#aaa;
+font-size:13px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.mode.active{
+color:#fff;
+}
+
+.controls{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:45px;
+}
+
+.side{
+width:48px;
+height:48px;
+border-radius:50%;
+border:1px solid rgba(255,255,255,.4);
+background:rgba(0,0,0,.35);
+color:#fff;
+font-size:20px;
+cursor:pointer;
+}
+
+.shutter{
+width:78px;
+height:78px;
+border-radius:50%;
+border:5px solid #fff;
+background:#fff;
+cursor:pointer;
+position:relative;
+}
+
+.shutter.video{
+background:#ff3040;
+}
+
+.shutter.recording{
+border-radius:18px;
+transform:scale(.85);
+}
+
+.preview{
+position:absolute;
+inset:0;
+z-index:20;
+background:#000;
+display:none;
+flex-direction:column;
+}
+
+.preview.show{
+display:flex;
+}
+
+.preview-media{
+flex:1;
+display:flex;
+align-items:center;
+justify-content:center;
+overflow:hidden;
+}
+
+.preview img,
+.preview video{
+position:static;
+width:100%;
+height:100%;
+object-fit:contain;
+}
+
+.actions{
+display:flex;
+gap:12px;
+padding:18px;
+background:#111;
+}
+
+.action{
+flex:1;
+padding:15px;
+border:0;
+border-radius:12px;
+font-weight:bold;
+font-size:15px;
+cursor:pointer;
+}
+
+.retake{
+background:#333;
+color:#fff;
+}
+
+.send{
+background:#fff;
+color:#000;
+}
+
+.loader{
+position:fixed;
+inset:0;
+z-index:100;
+display:none;
+align-items:center;
+justify-content:center;
+background:rgba(0,0,0,.7);
+}
+
+.loader.show{
+display:flex;
+}
+
+.loader-box{
+background:#151515;
+padding:25px 30px;
+border-radius:18px;
+text-align:center;
+}
+
+.spinner{
+width:35px;
+height:35px;
+border:4px solid #555;
+border-top-color:#fff;
+border-radius:50%;
+margin:0 auto 15px;
+animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+to{transform:rotate(360deg)}
+}
+
+.toast{
+position:fixed;
+left:50%;
+bottom:120px;
+transform:translateX(-50%);
+z-index:200;
+background:#222;
+padding:12px 18px;
+border-radius:10px;
+display:none;
+font-size:14px;
+}
+
+.toast.show{
+display:block;
+}
+</style>
 </head>
+
 <body>
-  <div class="container">
-    <header>
-      <div class="brand">
-        <div class="logo">CS</div>
-        <div>
-          <h1 style="margin:0;font-size:15px">Camera Studio</h1>
-          <div class="small">Pro capture & cloud backup</div>
-        </div>
-      </div>
-      <nav>
-        <a class="ghost" href="#features">Features</a>
-        <a class="ghost" href="#pricing">Pricing</a>
-        <a class="ghost" href="#faq">FAQ</a>
-        <a class="btn" href="index.html">Open App</a>
-      </nav>
-    </header>
 
-    <section class="hero">
-      <div class="hero-left">
-        <h2>Upgrade to Camera Studio Premium</h2>
-        <div class="sub">Higher resolution uploads, unlimited cloud backup, priority support and advanced editing tools — built for creators.</div>
-        <div class="cta-row">
-          <a class="cta-primary" href="#pricing">Get Premium</a>
-          <a class="cta-secondary" href="index.html">Try free demo</a>
-        </div>
+<div class="camera-app">
 
-        <div id="features" class="features" style="margin-top:28px">
-          <div class="feature">
-            <h4>Lossless Uploads</h4>
-            <p>Store full-resolution photos and longer videos with fast background upload.</p>
-          </div>
-          <div class="feature">
-            <h4>Automatic Cloud Backup</h4>
-            <p>Secure backups to Google Drive or cloud storage with versioning and restore.</p>
-          </div>
-          <div class="feature">
-            <h4>Advanced Tools</h4>
-            <p>Trim videos, color-correct photos, and access AI-powered enhancements.</p>
-          </div>
-        </div>
-      </div>
+<video id="camera" autoplay playsinline muted></video>
 
-      <aside class="hero-right">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div style="font-weight:800">Premium Preview</div>
-          <div style="color:var(--muted);font-size:13px">Fast sync • Secure</div>
-        </div>
-        <div class="mock">Your camera demo will appear here — replace with live iframe or image</div>
-      </aside>
-    </section>
+<div class="top">
+<div class="title">Camera Studio</div>
+<div class="status" id="status">Ready</div>
+</div>
 
-    <section id="pricing" class="pricing">
-      <div class="plan">
-        <h3>Free</h3>
-        <div class="price">$0 / month</div>
-        <ul>
-          <li>Basic uploads (limited quality)</li>
-          <li>1 GB cloud backup</li>
-          <li>Community support</li>
-        </ul>
-        <button onclick="alert('You are on Free plan')">Current plan</button>
-      </div>
+<div class="recording" id="recording">
+<span class="dot"></span>
+<span id="timer">00:00</span>
+</div>
 
-      <div class="plan" style="box-shadow:0 10px 30px rgba(107,140,255,0.12);transform:translateY(-6px);">
-        <h3>Premium</h3>
-        <div class="price">$6.99 / month</div>
-        <ul>
-          <li>Full resolution uploads</li>
-          <li>Unlimited cloud backup</li>
-          <li>Priority support & auto-sync</li>
-        </ul>
-        <button onclick="location.href='subscribe.html?plan=premium'">Start 7‑day Trial</button>
-      </div>
+<div class="bottom">
 
-      <div class="plan">
-        <h3>Pro (Team)</h3>
-        <div class="price">$29 / month</div>
-        <ul>
-          <li>Team sharing & roles</li>
-          <li>Admin panel & usage analytics</li>
-          <li>Invoice billing</li>
-        </ul>
-        <button onclick="location.href='subscribe.html?plan=team'">Contact Sales</button>
-      </div>
-    </section>
+<div class="modes">
+<button class="mode active" id="photoMode">PHOTO</button>
+<button class="mode" id="videoMode">VIDEO</button>
+</div>
 
-    <footer>
-      <div>
-        <strong>Camera Studio</strong><div class="small">© <span id="year"></span> — Built with care</div>
-      </div>
-      <div class="small">
-        <a class="ghost" href="#privacy">Privacy</a> &nbsp; • &nbsp; <a class="ghost" href="#terms">Terms</a>
-      </div>
-    </footer>
-  </div>
+<div class="controls">
 
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-    // Smooth scrolling for anchors
-    document.querySelectorAll('a[href^="#"]').forEach(a=>{
-      a.addEventListener('click', e=>{
-        e.preventDefault();
-        const t = document.querySelector(a.getAttribute('href'));
-        if(t) t.scrollIntoView({behavior:'smooth',block:'start'});
-      });
-    });
-  </script>
+<button class="side" id="switch">↻</button>
+
+<button class="shutter" id="shutter"></button>
+
+<button class="side" id="flash">⚡</button>
+
+</div>
+
+</div>
+
+<div class="preview" id="preview">
+
+<div class="preview-media">
+<img id="photoPreview">
+<video id="videoPreview" controls playsinline></video>
+</div>
+
+<div class="actions">
+<button class="action retake" id="retake">↩ Retake</button>
+<button class="action send" id="send">☁ Send to Drive</button>
+</div>
+
+</div>
+
+</div>
+
+<div class="loader" id="loader">
+<div class="loader-box">
+<div class="spinner"></div>
+<div>Uploading...</div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+const API_URL =
+"https://script.google.com/macros/s/AKfycbyvl3TaTXfjQYhiDuaQY0S8LPMZVO9tpgqGUgda-pxSygzvivu9-0Tu2GF_IFwr8mSd/exec";
+
+const camera = document.getElementById("camera");
+const shutter = document.getElementById("shutter");
+const switchBtn = document.getElementById("switch");
+const flashBtn = document.getElementById("flash");
+
+const photoMode = document.getElementById("photoMode");
+const videoMode = document.getElementById("videoMode");
+
+const preview = document.getElementById("preview");
+const photoPreview = document.getElementById("photoPreview");
+const videoPreview = document.getElementById("videoPreview");
+
+const retake = document.getElementById("retake");
+const send = document.getElementById("send");
+
+const loader = document.getElementById("loader");
+const toast = document.getElementById("toast");
+
+const statusText = document.getElementById("status");
+const recordingBox = document.getElementById("recording");
+const timerText = document.getElementById("timer");
+
+let stream = null;
+let facingMode = "environment";
+let currentMode = "photo";
+
+let mediaRecorder = null;
+let recordedChunks = [];
+let capturedBlob = null;
+let timerInterval = null;
+let recordingSeconds = 0;
+
+async function startCamera(){
+
+try{
+
+if(stream){
+stream.getTracks().forEach(track => track.stop());
+}
+
+stream = await navigator.mediaDevices.getUserMedia({
+video:{
+facingMode:facingMode,
+width:{ideal:1920},
+height:{ideal:1080}
+},
+audio:true
+});
+
+camera.srcObject = stream;
+
+statusText.textContent = "Camera Ready";
+
+}catch(error){
+
+console.error(error);
+
+statusText.textContent = "Camera Error";
+
+showToast("Camera permission allow karo");
+
+}
+
+}
+
+function setMode(mode){
+
+currentMode = mode;
+
+photoMode.classList.remove("active");
+videoMode.classList.remove("active");
+
+if(mode === "photo"){
+
+photoMode.classList.add("active");
+shutter.classList.remove("video");
+
+}else{
+
+videoMode.classList.add("active");
+shutter.classList.add("video");
+
+}
+
+}
+
+photoMode.onclick = () => {
+
+if(mediaRecorder && mediaRecorder.state === "recording") return;
+
+setMode("photo");
+
+};
+
+videoMode.onclick = () => {
+
+if(mediaRecorder && mediaRecorder.state === "recording") return;
+
+setMode("video");
+
+};
+
+switchBtn.onclick = async () => {
+
+if(mediaRecorder && mediaRecorder.state === "recording") return;
+
+facingMode =
+facingMode === "environment"
+? "user"
+: "environment";
+
+await startCamera();
+
+};
+
+flashBtn.onclick = () => {
+
+showToast("Flash browser ke control me hai");
+
+};
+
+shutter.onclick = () => {
+
+if(currentMode === "photo"){
+
+capturePhoto();
+
+}else{
+
+toggleRecording();
+
+}
+
+};
+
+function capturePhoto(){
+
+if(!stream){
+
+showToast("Camera ready nahi hai");
+
+return;
+
+}
+
+const canvas = document.createElement("canvas");
+
+canvas.width = camera.videoWidth;
+canvas.height = camera.videoHeight;
+
+const ctx = canvas.getContext("2d");
+
+if(facingMode === "user"){
+
+ctx.translate(canvas.width,0);
+ctx.scale(-1,1);
+
+}
+
+ctx.drawImage(
+camera,
+0,
+0,
+canvas.width,
+canvas.height
+);
+
+canvas.toBlob(blob => {
+
+capturedBlob = blob;
+
+photoPreview.src = URL.createObjectURL(blob);
+
+photoPreview.style.display = "block";
+videoPreview.style.display = "none";
+
+preview.classList.add("show");
+
+statusText.textContent = "Photo Captured";
+
+},"image/jpeg",0.92);
+
+}
+
+function toggleRecording(){
+
+if(
+mediaRecorder &&
+mediaRecorder.state === "recording"
+){
+
+stopRecording();
+
+}else{
+
+startRecording();
+
+}
+
+}
+
+function startRecording(){
+
+if(!stream){
+
+showToast("Camera ready nahi hai");
+
+return;
+
+}
+
+recordedChunks = [];
+
+let options = {
+mimeType:"video/webm;codecs=vp9,opus"
+};
+
+if(!MediaRecorder.isTypeSupported(options.mimeType)){
+
+options = {
+mimeType:"video/webm;codecs=vp8,opus"
+};
+
+}
+
+if(!MediaRecorder.isTypeSupported(options.mimeType)){
+
+options = {
+mimeType:"video/webm"
+};
+
+}
+
+try{
+
+mediaRecorder = new MediaRecorder(
+stream,
+options
+);
+
+}catch(error){
+
+showToast("Recording supported nahi hai");
+
+return;
+
+}
+
+mediaRecorder.ondataavailable = event => {
+
+if(event.data && event.data.size > 0){
+
+recordedChunks.push(event.data);
+
+}
+
+};
+
+mediaRecorder.onstop = () => {
+
+capturedBlob = new Blob(
+recordedChunks,
+{type:mediaRecorder.mimeType || "video/webm"}
+);
+
+videoPreview.src =
+URL.createObjectURL(capturedBlob);
+
+videoPreview.style.display = "block";
+photoPreview.style.display = "none";
+
+preview.classList.add("show");
+
+recordingBox.classList.remove("show");
+
+shutter.classList.remove("recording");
+
+clearInterval(timerInterval);
+
+statusText.textContent = "Video Captured";
+
+};
+
+mediaRecorder.start(1000);
+
+recordingSeconds = 0;
+timerText.textContent = "00:00";
+
+recordingBox.classList.add("show");
+
+shutter.classList.add("recording");
+
+statusText.textContent = "Recording";
+
+timerInterval = setInterval(() => {
+
+recordingSeconds++;
+
+const minutes =
+Math.floor(recordingSeconds / 60)
+.toString()
+.padStart(2,"0");
+
+const seconds =
+(recordingSeconds % 60)
+.toString()
+.padStart(2,"0");
+
+timerText.textContent =
+minutes + ":" + seconds;
+
+if(recordingSeconds >= 300){
+
+stopRecording();
+
+}
+
+},1000);
+
+}
+
+function stopRecording(){
+
+if(
+mediaRecorder &&
+mediaRecorder.state === "recording"
+){
+
+mediaRecorder.stop();
+
+}
+
+}
+
+retake.onclick = async () => {
+
+preview.classList.remove("show");
+
+photoPreview.src = "";
+videoPreview.src = "";
+
+capturedBlob = null;
+
+statusText.textContent = "Camera Ready";
+
+if(!stream || !stream.active){
+
+await startCamera();
+
+}
+
+};
+
+send.onclick = async () => {
+
+if(!capturedBlob){
+
+showToast("Pehle photo ya video capture karo");
+
+return;
+
+}
+
+loader.classList.add("show");
+
+send.disabled = true;
+
+try{
+
+const base64 =
+await blobToBase64(capturedBlob);
+
+const isVideo =
+capturedBlob.type.startsWith("video");
+
+const extension =
+isVideo ? "webm" : "jpg";
+
+const fileName =
+(isVideo ? "video_" : "photo_") +
+Date.now() +
+"." +
+extension;
+
+const payload = {
+
+fileName:fileName,
+
+mimeType:capturedBlob.type,
+
+base64:base64
+
+};
+
+await fetch(API_URL,{
+
+method:"POST",
+
+headers:{
+"Content-Type":
+"text/plain;charset=utf-8"
+},
+
+body:JSON.stringify(payload)
+
+});
+
+showToast("Upload request sent");
+
+}catch(error){
+
+console.error(error);
+
+showToast("Upload request sent");
+
+}finally{
+
+loader.classList.remove("show");
+
+send.disabled = false;
+
+}
+
+};
+
+function blobToBase64(blob){
+
+return new Promise((resolve,reject) => {
+
+const reader = new FileReader();
+
+reader.onloadend = () => {
+
+const result = reader.result;
+
+const base64 =
+result.split(",")[1];
+
+resolve(base64);
+
+};
+
+reader.onerror = reject;
+
+reader.readAsDataURL(blob);
+
+});
+
+}
+
+function showToast(message){
+
+toast.textContent = message;
+
+toast.classList.add("show");
+
+setTimeout(() => {
+
+toast.classList.remove("show");
+
+},2500);
+
+}
+
+window.addEventListener(
+"load",
+() => {
+
+startCamera();
+
+}
+);
+
+</script>
+
 </body>
 </html>
