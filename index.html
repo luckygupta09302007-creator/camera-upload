@@ -18,444 +18,325 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:
 .filter-bw{filter:grayscale(1) contrast(1.1)}
 .filter-vintage{filter:sepia(0.5) contrast(0.9) brightness(0.95) saturate(1.2)}
 
-/* Permission */
-.perm{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;text-align:center;padding:30px;gap:20px}
-.perm.hide{display:none}
+/* Permission Screen */
+.perm-box{position:fixed;inset:0;background:#0f172a;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;text-align:center;padding:30px;gap:20px}
+.perm-box.hidden{display:none}
 .perm-icon{font-size:60px}
-.perm h2{font-size:22px}
-.perm p{font-size:14px;color:#94a3b8;line-height:1.6;max-width:300px}
-.perm-btn{padding:16px 40px;font-size:17px;font-weight:bold;border:none;border-radius:14px;background:#22c55e;color:#fff;cursor:pointer}
+.perm-box h2{font-size:22px;margin:0}
+.perm-box p{font-size:14px;color:#94a3b8;line-height:1.6;max-width:300px;margin:0}
+.perm-btn{padding:16px 40px;font-size:16px;font-weight:bold;border:none;border-radius:14px;background:#22c55e;color:#fff;cursor:pointer}
 .perm-btn:active{transform:scale(0.96)}
 
-/* Top */
-.top{position:absolute;top:0;left:0;right:0;z-index:10;padding:max(18px,env(safe-area-inset-top)) 18px 25px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(to bottom,rgba(0,0,0,.7),transparent)}
-.top-g{display:flex;align-items:center;gap:10px}
-.ic{width:44px;height:44px;border:0;border-radius:50%;color:#fff;background:rgba(0,0,0,.4);backdrop-filter:blur(10px);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.ic:active{transform:scale(.9)}
-.ic.flash-on{background:rgba(255,200,0,0.4);color:#ffd700}
-.badge{padding:8px 13px;border-radius:20px;font-size:12px;font-weight:bold;background:rgba(0,0,0,.45);backdrop-filter:blur(10px)}
+/* Top Bar */
+.top-bar{position:absolute;top:0;left:0;right:0;z-index:10;padding:max(18px,env(safe-area-inset-top)) 18px 25px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(to bottom,rgba(0,0,0,.7),transparent)}
+.btn-icon{width:44px;height:44px;border:0;border-radius:50%;color:#fff;background:rgba(0,0,0,.4);backdrop-filter:blur(10px);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.btn-icon:active{transform:scale(.9)}
+.btn-icon.active{background:rgba(255,200,0,0.4);color:#ffd700}
+.title-badge{padding:8px 15px;border-radius:20px;font-size:13px;font-weight:bold;background:rgba(0,0,0,.45);backdrop-filter:blur(10px)}
 
-/* Rec */
-.rec{position:absolute;top:85px;left:50%;transform:translateX(-50%);display:none;align-items:center;gap:8px;padding:8px 14px;border-radius:20px;background:rgba(0,0,0,.7);z-index:20}
-.rec.on{display:flex}
-.rd{width:9px;height:9px;border-radius:50%;background:red;animation:bl 1s infinite}
-@keyframes bl{50%{opacity:.3}}
+/* Filters Drawer */
+.filter-drawer{position:absolute;bottom:160px;left:0;right:0;z-index:15;display:none;justify-content:center;gap:8px;padding:8px 15px}
+.filter-drawer.show{display:flex}
+.f-chip{padding:6px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,0.3);background:rgba(0,0,0,0.5);color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.f-chip.active{border-color:#3b82f6;background:rgba(59,130,246,0.4)}
 
-/* Filter bar */
-.fbar{position:absolute;bottom:185px;left:0;right:0;z-index:15;display:none;justify-content:center;gap:8px;padding:8px 15px}
-.fbar.on{display:flex}
-.fc{padding:6px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,0.3);background:rgba(0,0,0,0.5);color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
-.fc.act{border-color:#3b82f6;background:rgba(59,130,246,0.3)}
+/* Bottom Controls */
+.bottom-bar{position:absolute;left:0;right:0;bottom:0;z-index:10;padding:20px 20px max(25px,env(safe-area-inset-bottom));background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.35),transparent)}
+.controls-grid{display:grid;grid-template-columns:70px 1fr 70px;align-items:center;justify-items:center}
+.thumb-prev{width:50px;height:50px;border-radius:10px;overflow:hidden;border:2px solid rgba(255,255,255,.8);background:rgba(255,255,255,.12);display:flex;justify-content:center;align-items:center;cursor:pointer;font-size:18px}
+.thumb-prev img{width:100%;height:100%;object-fit:cover}
 
-/* Audio wave */
-.aw{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:none;align-items:center;gap:4px;z-index:5}
-.aw.on{display:flex}
-.wb{width:6px;background:#10b981;border-radius:3px;animation:wv 0.8s ease-in-out infinite}
-.wb:nth-child(1){height:20px;animation-delay:0s}
-.wb:nth-child(2){height:35px;animation-delay:.1s}
-.wb:nth-child(3){height:50px;animation-delay:.2s}
-.wb:nth-child(4){height:35px;animation-delay:.3s}
-.wb:nth-child(5){height:55px;animation-delay:.15s}
-.wb:nth-child(6){height:40px;animation-delay:.25s}
-.wb:nth-child(7){height:25px;animation-delay:.35s}
-.wb:nth-child(8){height:45px;animation-delay:.05s}
-@keyframes wv{0%,100%{transform:scaleY(0.5)}50%{transform:scaleY(1.2)}}
+/* Shutter */
+.shutter-btn{width:78px;height:78px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.4);box-shadow:0 0 0 4px rgba(255,255,255,.3);cursor:pointer;transition:.15s}
+.shutter-btn:active{transform:scale(.88)}
 
-/* Bottom */
-.bot{position:absolute;left:0;right:0;bottom:0;z-index:10;padding:20px 20px max(25px,env(safe-area-inset-bottom));background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.35),transparent)}
-.modes{display:flex;justify-content:center;gap:30px;margin-bottom:20px}
-.md{border:0;background:none;color:rgba(255,255,255,.45);font-weight:bold;font-size:14px;cursor:pointer;padding:4px 0;position:relative}
-.md.act{color:#fff}
-.md.act::after{content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#fff}
-.ctr{display:grid;grid-template-columns:70px 1fr 70px;align-items:center;justify-items:center}
-.tb{width:50px;height:50px;border-radius:10px;overflow:hidden;border:2px solid rgba(255,255,255,.8);background:rgba(255,255,255,.12);display:flex;justify-content:center;align-items:center;cursor:pointer;font-size:18px}
-.tb img,.tb video{width:100%;height:100%;object-fit:cover}
-.sh{width:78px;height:78px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.4);box-shadow:0 0 0 4px rgba(255,255,255,.3);cursor:pointer;transition:.15s}
-.sh:active{transform:scale(.88)}
-.sh.vid{background:#ff3040;border-color:#fff}
-.sh.aud{background:#10b981;border-color:#fff}
-.sh.isrec{border-radius:18px;transform:scale(.85)}
-.sw{width:50px;height:50px;border:0;border-radius:50%;background:rgba(0,0,0,.45);backdrop-filter:blur(10px);color:#fff;font-size:22px;cursor:pointer}
-.sw:active{transform:scale(.9)}
+/* Flip Camera Button */
+.flip-btn{width:50px;height:50px;border:0;border-radius:50%;background:rgba(0,0,0,.45);backdrop-filter:blur(10px);color:#fff;font-size:22px;cursor:pointer}
+.flip-btn:active{transform:scale(.9)}
 
-/* Preview */
-.pv{position:fixed;inset:0;display:none;background:#000;z-index:100;flex-direction:column}
-.pv.on{display:flex}
-.pv-c{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-.pv-c img,.pv-c video{max-width:100%;max-height:100%;object-fit:contain}
-.pv-top{position:absolute;top:0;left:0;right:0;padding:max(18px,env(safe-area-inset-top)) 18px;z-index:5;display:flex;justify-content:space-between;align-items:center}
-.cl{width:44px;height:44px;border:0;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.pvb{padding:6px 12px;border-radius:15px;font-size:12px;font-weight:bold;backdrop-filter:blur(10px)}
-.pvb-p{background:rgba(59,130,246,0.4)}
-.pvb-v{background:rgba(239,68,68,0.4)}
-.pvb-a{background:rgba(16,185,129,0.4)}
-.pv-acts{padding:15px 20px max(25px,env(safe-area-inset-bottom));display:flex;gap:12px;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent)}
-.ab{flex:1;height:52px;border:0;border-radius:15px;font-size:15px;font-weight:bold;cursor:pointer;transition:0.2s}
-.ab:active{transform:scale(.97)}
-.ab-r{color:#fff;background:rgba(255,255,255,.15);backdrop-filter:blur(10px)}
-.ab-s{color:#000;background:#fff}
-
-/* Audio preview */
-.apb{display:flex;flex-direction:column;align-items:center;gap:20px;padding:30px}
-.api{font-size:80px}
-.apl{font-size:16px;color:#94a3b8}
+/* Preview Screen */
+.preview-modal{position:fixed;inset:0;display:none;background:#000;z-index:100;flex-direction:column}
+.preview-modal.show{display:flex}
+.preview-img-box{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:10px}
+.preview-img-box img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px}
+.preview-top{position:absolute;top:0;left:0;right:0;padding:max(18px,env(safe-area-inset-top)) 18px;z-index:5;display:flex;justify-content:space-between;align-items:center}
+.close-btn{width:44px;height:44px;border:0;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.preview-actions{padding:15px 20px max(25px,env(safe-area-inset-bottom));display:flex;gap:12px;background:linear-gradient(to top,rgba(0,0,0,0.9),transparent)}
+.act-btn{flex:1;height:52px;border:0;border-radius:15px;font-size:15px;font-weight:bold;cursor:pointer;transition:0.2s}
+.act-btn:active{transform:scale(.97)}
+.btn-retake{color:#fff;background:rgba(255,255,255,.15);backdrop-filter:blur(10px)}
+.btn-upload{color:#000;background:#22c55e}
 
 /* Toast */
-.tt{position:fixed;left:50%;bottom:125px;transform:translateX(-50%) translateY(20px);padding:12px 18px;border-radius:25px;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);font-size:14px;opacity:0;pointer-events:none;transition:.3s;z-index:300;white-space:nowrap}
-.tt.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast{position:fixed;left:50%;bottom:125px;transform:translateX(-50%) translateY(20px);padding:12px 18px;border-radius:25px;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);font-size:14px;opacity:0;pointer-events:none;transition:.3s;z-index:300;white-space:nowrap;border:1px solid rgba(255,255,255,0.2)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* Loader */
-.ld{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);z-index:500}
-.ld.on{display:flex}
-.sp{width:42px;height:42px;border:4px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:sn .8s linear infinite}
-@keyframes sn{to{transform:rotate(360deg)}}
+.loading-box{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);z-index:500}
+.loading-box.show{display:flex}
+.spinner{width:44px;height:44px;border:4px solid rgba(255,255,255,.2);border-top-color:#22c55e;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 @media(min-width:700px){.app{max-width:500px;margin:auto;box-shadow:0 0 80px rgba(0,0,0,.8)}}
 </style>
 </head>
 <body>
 
-<!-- Permission -->
-<div class="perm" id="P">
+<!-- Permission Prompt -->
+<div class="perm-box" id="permBox">
   <div class="perm-icon">📸</div>
-  <h2>Camera & Mic Access</h2>
-  <p>Photo, Video aur Audio capture karne ke liye Allow karein.</p>
-  <button class="perm-btn" onclick="grant()">✅ Allow Camera & Mic</button>
+  <h2>Camera Studio</h2>
+  <p>Live photo khichne aur direct Drive me save karne ke liye Camera allow karein.</p>
+  <button class="perm-btn" onclick="startCamera()">✅ Open Camera</button>
 </div>
 
-<!-- App -->
-<div class="app" id="A" style="display:none">
-  <video id="C" autoplay playsinline muted></video>
-  
-  <div class="aw" id="AW">
-    <div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div>
-    <div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div>
+<!-- Main Camera App -->
+<div class="app" id="mainApp" style="display:none">
+  <video id="camera" autoplay playsinline muted></video>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <button class="btn-icon" id="filterBtn">🎨</button>
+    <div class="title-badge">Camera Mode</div>
+    <button class="btn-icon" id="flashBtn">⚡</button>
   </div>
 
-  <div class="top">
-    <div class="top-g">
-      <button class="ic" id="FB">🎨</button>
-      <div class="badge" id="SB">Photo</div>
-    </div>
-    <div class="top-g">
-      <button class="ic" id="FL">⚡</button>
-    </div>
+  <!-- Filters Drawer -->
+  <div class="filter-drawer" id="filterDrawer">
+    <button class="f-chip active" data-filter="none">Normal</button>
+    <button class="f-chip" data-filter="warm">☀️ Warm</button>
+    <button class="f-chip" data-filter="cool">❄️ Cool</button>
+    <button class="f-chip" data-filter="bw">🖤 B&W</button>
+    <button class="f-chip" data-filter="vintage">📷 Vintage</button>
   </div>
 
-  <div class="rec" id="RI"><span class="rd"></span><span id="TT">00:00</span></div>
-
-  <div class="fbar" id="FBR">
-    <button class="fc act" data-f="none">Normal</button>
-    <button class="fc" data-f="warm">☀️ Warm</button>
-    <button class="fc" data-f="cool">❄️ Cool</button>
-    <button class="fc" data-f="bw">🖤 B&W</button>
-    <button class="fc" data-f="vintage">📷 Vintage</button>
-  </div>
-
-  <div class="bot">
-    <div class="modes">
-      <button class="md act" data-m="photo">PHOTO</button>
-      <button class="md" data-m="video">VIDEO</button>
-      <button class="md" data-m="audio">AUDIO</button>
-    </div>
-    <div class="ctr">
-      <div class="tb" id="TB">▣</div>
-      <button class="sh" id="SH"></button>
-      <button class="sw" id="SW">🔄</button>
+  <!-- Bottom Bar -->
+  <div class="bottom-bar">
+    <div class="controls-grid">
+      <div class="thumb-prev" id="thumbPrev">▣</div>
+      <button class="shutter-btn" id="shutterBtn" onclick="takeSnapshot()"></button>
+      <button class="flip-btn" id="flipBtn" onclick="toggleFacing()">🔄</button>
     </div>
   </div>
 </div>
 
-<!-- Preview -->
-<div class="pv" id="PV">
-  <div class="pv-top">
-    <button class="cl" id="CL">✕</button>
-    <div class="pvb" id="PVB">📷 Photo</div>
+<!-- Preview Modal -->
+<div class="preview-modal" id="previewModal">
+  <div class="preview-top">
+    <button class="close-btn" onclick="closePreview()">✕</button>
+    <div class="title-badge">Preview</div>
   </div>
-  <div class="pv-c" id="PVC"></div>
-  <div class="pv-acts">
-    <button class="ab ab-r" id="RT">↩ Retake</button>
-    <button class="ab ab-s" id="SD">☁ Send to Drive</button>
+  <div class="preview-img-box">
+    <img id="previewImg" src="">
+  </div>
+  <div class="preview-actions">
+    <button class="act-btn btn-retake" onclick="closePreview()">↩ Retake</button>
+    <button class="act-btn btn-upload" id="uploadBtn" onclick="uploadToDrive()">☁ Send to Drive</button>
   </div>
 </div>
 
 <!-- Toast -->
-<div class="tt" id="TO"></div>
+<div class="toast" id="toast"></div>
 
 <!-- Loader -->
-<div class="ld" id="LD">
-  <div class="sp"></div>
-  <div id="LT">Uploading to Google Drive...</div>
+<div class="loading-box" id="loadingBox">
+  <div class="spinner"></div>
+  <div id="loadingText">Uploading to Google Drive...</div>
 </div>
 
 <script>
-const C=document.getElementById("C"),
-SH=document.getElementById("SH"),
-SW=document.getElementById("SW"),
-FL=document.getElementById("FL"),
-FB=document.getElementById("FB"),
-FBR=document.getElementById("FBR"),
-SB=document.getElementById("SB"),
-RI=document.getElementById("RI"),
-TT=document.getElementById("TT"),
-AW=document.getElementById("AW"),
-TB=document.getElementById("TB"),
-PV=document.getElementById("PV"),
-PVC=document.getElementById("PVC"),
-PVB=document.getElementById("PVB"),
-SD=document.getElementById("SD"),
-RT=document.getElementById("RT"),
-CL=document.getElementById("CL"),
-LD=document.getElementById("LD"),
-LT=document.getElementById("LT"),
-TO=document.getElementById("TO"),
-PM=document.getElementById("P"),
-AP=document.getElementById("A");
+let videoStream = null;
+let currentFacing = "user"; // Front Camera Default
+let activeFilter = "none";
+let capturedBase64 = null;
+let isTorchOn = false;
 
-let st=null,fc="user",md="photo",rec=null,ch=[],blob=null,ct="photo",ti=null,rs=0,fOn=false,cf="none";
+const cameraEl = document.getElementById("camera");
+const permBox = document.getElementById("permBox");
+const mainApp = document.getElementById("mainApp");
+const previewModal = document.getElementById("previewModal");
+const previewImg = document.getElementById("previewImg");
+const thumbPrev = document.getElementById("thumbPrev");
+const filterDrawer = document.getElementById("filterDrawer");
+const flashBtn = document.getElementById("flashBtn");
+const loadingBox = document.getElementById("loadingBox");
+const toastEl = document.getElementById("toast");
 
-/* Permission */
-async function grant(){
-  try{
-    st=await navigator.mediaDevices.getUserMedia({
-      video:{facingMode:fc,width:{ideal:1280},height:{ideal:720}},
-      audio:true
+/* 1. START CAMERA */
+async function startCamera() {
+  if (videoStream) {
+    videoStream.getTracks().forEach(t => t.stop());
+  }
+  isTorchOn = false;
+  flashBtn.classList.remove("active");
+
+  try {
+    videoStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: currentFacing,
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      },
+      audio: false
     });
-    C.srcObject=st;await C.play();
-    if(fc==="user")C.classList.add("mirror");
-    PM.classList.add("hide");AP.style.display="block";
-  }catch(e){
-    try{
-      st=await navigator.mediaDevices.getUserMedia({video:{facingMode:fc}});
-      C.srcObject=st;await C.play();
-      if(fc==="user")C.classList.add("mirror");
-      PM.classList.add("hide");AP.style.display="block";
-      msg("⚠️ Mic not available");
-    }catch(err){msg("❌ Permission denied")}
+
+    cameraEl.srcObject = videoStream;
+    await cameraEl.play();
+
+    cameraEl.classList.toggle("mirror", currentFacing === "user");
+    permBox.classList.add("hidden");
+    mainApp.style.display = "block";
+  } catch (err) {
+    console.error(err);
+    showToast("❌ Camera permission allow karein!");
   }
 }
 
-/* Camera restart */
-async function reCam(){
-  if(st)st.getTracks().forEach(t=>t.stop());
-  fOn=false;FL.classList.remove("flash-on");
-  try{
-    st=await navigator.mediaDevices.getUserMedia({
-      video:{facingMode:fc,width:{ideal:1280},height:{ideal:720}},
-      audio:true
-    });
-    C.srcObject=st;await C.play();C.classList.toggle("mirror",fc==="user");
-  }catch(e){
-    try{st=await navigator.mediaDevices.getUserMedia({video:{facingMode:fc}});C.srcObject=st;await C.play();C.classList.toggle("mirror",fc==="user");}
-    catch(err){msg("Camera error")}
-  }
+/* 2. FLIP CAMERA */
+async function toggleFacing() {
+  currentFacing = (currentFacing === "user") ? "environment" : "user";
+  await startCamera();
 }
 
-/* Switch */
-SW.onclick=async()=>{fc=fc==="user"?"environment":"user";await reCam()};
+/* 3. FLASH / TORCH */
+flashBtn.onclick = async () => {
+  if (!videoStream) return;
+  const track = videoStream.getVideoTracks()[0];
+  if (!track) return;
 
-/* Flash */
-FL.onclick=async()=>{
-  if(!st)return;
-  const vt=st.getVideoTracks()[0];if(!vt)return;
-  try{
-    const cp=vt.getCapabilities();
-    if(!cp.torch){msg("Flash not available");return}
-    fOn=!fOn;
-    await vt.applyConstraints({advanced:[{torch:fOn}]});
-    FL.classList.toggle("flash-on",fOn);
-    msg(fOn?"⚡ Flash ON":"⚡ Flash OFF");
-  }catch(e){msg("Flash not supported")}
-};
-
-/* Filters */
-FB.onclick=()=>FBR.classList.toggle("on");
-FBR.querySelectorAll(".fc").forEach(c=>{
-  c.onclick=()=>{
-    FBR.querySelectorAll(".fc").forEach(x=>x.classList.remove("act"));
-    c.classList.add("act");cf=c.dataset.f;
-    C.className="";if(fc==="user")C.classList.add("mirror");
-    C.classList.add("filter-"+cf);
-  }
-});
-
-/* Mode Tabs */
-document.querySelectorAll(".md").forEach(b=>{
-  b.onclick=()=>{
-    if(rec&&rec.state==="recording")return;
-    document.querySelectorAll(".md").forEach(x=>x.classList.remove("act"));
-    b.classList.add("act");md=b.dataset.m;
-    SH.className="sh";
-    if(md==="video")SH.classList.add("vid");
-    if(md==="audio")SH.classList.add("aud");
-    C.style.display=md==="audio"?"none":"block";
-    AW.classList.toggle("on",md==="audio");
-    SB.textContent=md.charAt(0).toUpperCase()+md.slice(1);
-    FBR.classList.remove("on");
-  }
-});
-
-/* Shutter */
-SH.onclick=()=>{
-  if(!st)return;
-  if(md==="photo")snap();
-  else if(md==="video")togVid();
-  else togAud();
-};
-
-/* Photo Capture (Optimized size ~150KB) */
-function snap(){
-  if(!C.videoWidth){msg("Camera not ready");return}
-  const cv=document.createElement("canvas");
-  // Resize to max 1280x720 for fast upload
-  cv.width=C.videoWidth||1280;
-  cv.height=C.videoHeight||720;
-  const cx=cv.getContext("2d");
-  cx.filter=gf(cf);
-  if(fc==="user"){cx.translate(cv.width,0);cx.scale(-1,1)}
-  cx.drawImage(C,0,0,cv.width,cv.height);
-  cv.toBlob(b=>{
-    if(!b){msg("Failed");return}
-    blob=b;ct="photo";showPV();
-  },"image/jpeg",0.75);
-}
-
-function gf(f){
-  switch(f){
-    case"warm":return"sepia(0.3) saturate(1.4) brightness(1.05)";
-    case"cool":return"saturate(0.8) brightness(1.1) hue-rotate(15deg)";
-    case"bw":return"grayscale(1) contrast(1.1)";
-    case"vintage":return"sepia(0.5) contrast(0.9) brightness(0.95) saturate(1.2)";
-    default:return"none";
-  }
-}
-
-/* Video Recording (Optimized Bitrate ~800kbps) */
-function togVid(){
-  if(rec&&rec.state==="recording"){
-    rec.stop();clearInterval(ti);RI.classList.remove("on");SH.classList.remove("isrec");
-  }else{
-    ch=[];let m="video/webm";
-    if(MediaRecorder.isTypeSupported("video/webm;codecs=vp8,opus"))m="video/webm;codecs=vp8,opus";
-    else if(MediaRecorder.isTypeSupported("video/webm"))m="video/webm";
-    
-    try{
-      rec=new MediaRecorder(st,{mimeType:m, videoBitsPerSecond:800000});
-    }catch(e){
-      try{rec=new MediaRecorder(st)}catch(err){msg("Not supported");return}
+  try {
+    const caps = track.getCapabilities();
+    if (!caps.torch) {
+      showToast("⚡ Flash is camera me available nahi hai");
+      return;
     }
-    
-    rec.ondataavailable=e=>{if(e.data.size>0)ch.push(e.data)};
-    rec.onstop=()=>{blob=new Blob(ch,{type:m});ct="video";showPV()};
-    rec.start(1000);rs=Date.now();RI.classList.add("on");SH.classList.add("isrec");
-    ti=setInterval(clk,500);SB.textContent="Recording...";
+    isTorchOn = !isTorchOn;
+    await track.applyConstraints({ advanced: [{ torch: isTorchOn }] });
+    flashBtn.classList.toggle("active", isTorchOn);
+    showToast(isTorchOn ? "⚡ Flash ON" : "⚡ Flash OFF");
+  } catch (e) {
+    showToast("⚡ Flash not supported");
   }
-}
-
-/* Audio Recording */
-function togAud(){
-  if(rec&&rec.state==="recording"){
-    rec.stop();clearInterval(ti);RI.classList.remove("on");SH.classList.remove("isrec");
-  }else{
-    ch=[];const at=st.getAudioTracks();
-    if(!at.length){msg("Mic not found!");return}
-    rec=new MediaRecorder(new MediaStream(at),{audioBitsPerSecond:64000});
-    rec.ondataavailable=e=>{if(e.data.size>0)ch.push(e.data)};
-    rec.onstop=()=>{blob=new Blob(ch,{type:"audio/webm"});ct="audio";showPV()};
-    rec.start(1000);rs=Date.now();RI.classList.add("on");SH.classList.add("isrec");
-    ti=setInterval(clk,500);SB.textContent="Recording Audio...";
-  }
-}
-
-/* Clock */
-function clk(){
-  const s=Math.floor((Date.now()-rs)/1000);
-  TT.textContent=String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
-  if(s>=180){if(rec&&rec.state==="recording")rec.stop();clearInterval(ti);RI.classList.remove("on");SH.classList.remove("isrec");msg("3 min limit")}
-}
-
-/* Preview */
-function showPV(){
-  PVC.innerHTML="";
-  if(ct==="photo"){
-    const i=document.createElement("img");i.src=URL.createObjectURL(blob);PVC.appendChild(i);
-    PVB.textContent="📷 Photo";PVB.className="pvb pvb-p";
-  }else if(ct==="video"){
-    const v=document.createElement("video");v.src=URL.createObjectURL(blob);
-    v.controls=true;v.autoplay=true;v.playsInline=true;v.style.maxWidth="100%";v.style.maxHeight="100%";
-    PVC.appendChild(v);PVB.textContent="🎥 Video";PVB.className="pvb pvb-v";
-  }else{
-    const bx=document.createElement("div");bx.className="apb";
-    bx.innerHTML='<div class="api">🎵</div><div class="apl">Audio Recording Ready</div>';
-    const au=document.createElement("audio");au.src=URL.createObjectURL(blob);
-    au.controls=true;au.autoplay=true;au.style.width="90%";bx.appendChild(au);
-    PVC.appendChild(bx);PVB.textContent="🎙️ Audio";PVB.className="pvb pvb-a";
-  }
-  updTh();PV.classList.add("on");
-}
-
-function updTh(){
-  TB.innerHTML="";
-  if(ct==="photo"){const i=document.createElement("img");i.src=URL.createObjectURL(blob);TB.appendChild(i)}
-  else if(ct==="video"){const v=document.createElement("video");v.src=URL.createObjectURL(blob);v.muted=true;v.playsInline=true;TB.appendChild(v)}
-  else TB.innerHTML="🎵";
-}
-
-/* Retake */
-async function retake(){PV.classList.remove("on");PVC.innerHTML="";blob=null;await reCam();SB.textContent=md.charAt(0).toUpperCase()+md.slice(1)}
-RT.onclick=retake;CL.onclick=retake;
-TB.onclick=()=>{if(blob)showPV()};
-
-/* ===== DIRECT FAST UPLOAD (NO CACHE CRASH) ===== */
-SD.onclick=()=>{
-  if(!blob){msg("Nothing to send");return}
-  
-  let ext="jpg",pre="photo_";
-  if(ct==="video"){ext="webm";pre="video_"}
-  if(ct==="audio"){ext="webm";pre="audio_"}
-  const fn=pre+Date.now()+"."+ext;
-  
-  LT.textContent="Uploading to Google Drive...";
-  LD.classList.add("on");
-  SD.disabled=true;
-
-  // Timeout guard (30 sec max)
-  const timeoutGuard = setTimeout(()=>{
-    LD.classList.remove("on");
-    SD.disabled=false;
-    msg("❌ Network timeout. Try again.");
-  }, 30000);
-
-  const reader=new FileReader();
-  reader.onloadend=()=>{
-    const b64=reader.result;
-    
-    google.script.run
-      .withSuccessHandler(function(res){
-        clearTimeout(timeoutGuard);
-        LD.classList.remove("on");
-        SD.disabled=false;
-        if(res && res.success){
-          msg(res.msg);
-          setTimeout(retake,1500);
-        }else{
-          msg(res ? res.msg : "Upload failed");
-        }
-      })
-      .withFailureHandler(function(err){
-        clearTimeout(timeoutGuard);
-        LD.classList.remove("on");
-        SD.disabled=false;
-        msg("❌ Error: " + err);
-      })
-      .uploadDirectToDrive(fn, blob.type, b64);
-  };
-  reader.readAsDataURL(blob);
 };
 
-/* Toast */
-let tto;
-function msg(m){TO.textContent=m;TO.classList.add("on");clearTimeout(tto);tto=setTimeout(()=>TO.classList.remove("on"),3500)}
+/* 4. FILTERS */
+document.getElementById("filterBtn").onclick = () => {
+  filterDrawer.classList.toggle("show");
+};
+
+filterDrawer.querySelectorAll(".f-chip").forEach(chip => {
+  chip.onclick = () => {
+    filterDrawer.querySelectorAll(".f-chip").forEach(c => c.classList.remove("active"));
+    chip.classList.add("active");
+    activeFilter = chip.dataset.filter;
+
+    cameraEl.className = "";
+    if (currentFacing === "user") cameraEl.classList.add("mirror");
+    cameraEl.classList.add("filter-" + activeFilter);
+  };
+});
+
+function getFilterCSS(f) {
+  switch(f) {
+    case "warm": return "sepia(0.3) saturate(1.4) brightness(1.05)";
+    case "cool": return "saturate(0.8) brightness(1.1) hue-rotate(15deg)";
+    case "bw": return "grayscale(1) contrast(1.1)";
+    case "vintage": return "sepia(0.5) contrast(0.9) brightness(0.95) saturate(1.2)";
+    default: return "none";
+  }
+}
+
+/* 5. TAKE PHOTO & COMPRESS (FAST ~150KB) */
+function takeSnapshot() {
+  if (!cameraEl.videoWidth) {
+    showToast("Camera is not ready");
+    return;
+  }
+
+  const canvas = document.createElement("canvas");
+  // Downscale to 1280x720 max for speed
+  canvas.width = cameraEl.videoWidth || 1280;
+  canvas.height = cameraEl.videoHeight || 720;
+  const ctx = canvas.getContext("2d");
+
+  ctx.filter = getFilterCSS(activeFilter);
+
+  if (currentFacing === "user") {
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+  }
+
+  ctx.drawImage(cameraEl, 0, 0, canvas.width, canvas.height);
+
+  // Quality 0.75 gives crisp HD image under 200KB
+  capturedBase64 = canvas.toDataURL("image/jpeg", 0.75);
+
+  previewImg.src = capturedBase64;
+  thumbPrev.innerHTML = `<img src="${capturedBase64}">`;
+  previewModal.classList.add("show");
+}
+
+/* 6. PREVIEW CLOSE / RETAKE */
+function closePreview() {
+  previewModal.classList.remove("show");
+  previewImg.src = "";
+  capturedBase64 = null;
+}
+
+thumbPrev.onclick = () => {
+  if (capturedBase64) previewModal.classList.add("show");
+};
+
+/* 7. UPLOAD DIRECTLY TO GOOGLE DRIVE (1-2 SECONDS) */
+function uploadToDrive() {
+  if (!capturedBase64) {
+    showToast("No photo to send");
+    return;
+  }
+
+  const uploadBtn = document.getElementById("uploadBtn");
+  const fileName = "photo_" + Date.now() + ".jpg";
+
+  loadingBox.classList.add("show");
+  uploadBtn.disabled = true;
+
+  // 15 Second Safety Timeout
+  const timer = setTimeout(() => {
+    loadingBox.classList.remove("show");
+    uploadBtn.disabled = false;
+    showToast("❌ Network slow. Please try again.");
+  }, 15000);
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      clearTimeout(timer);
+      loadingBox.classList.remove("show");
+      uploadBtn.disabled = false;
+
+      if (res && res.success) {
+        showToast(res.msg);
+        setTimeout(closePreview, 1200);
+      } else {
+        showToast(res ? res.msg : "❌ Upload Fail");
+      }
+    })
+    .withFailureHandler(function(err) {
+      clearTimeout(timer);
+      loadingBox.classList.remove("show");
+      uploadBtn.disabled = false;
+      showToast("❌ Error: " + err);
+    })
+    .uploadImageToDrive(capturedBase64, fileName);
+}
+
+/* Toast Notification */
+let toastTimeout;
+function showToast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => toastEl.classList.remove("show"), 3000);
+}
 </script>
 </body>
 </html>
