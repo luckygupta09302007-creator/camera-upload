@@ -1,186 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Camera Studio</title>
+<title>Camera Studio</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<style>
+* {
+  box-sizing: border-box;
+}
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: #111;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #111;
+  color: white;
+  font-family: Arial, sans-serif;
+}
 
-    .container {
-      width: 100%;
-      max-width: 700px;
-      margin: auto;
-      padding: 20px;
-      text-align: center;
-    }
+.container {
+  width: 100%;
+  max-width: 700px;
+  margin: auto;
+  padding: 20px;
+  text-align: center;
+}
 
-    h1 {
-      margin-bottom: 5px;
-    }
+h1 {
+  margin-bottom: 5px;
+}
 
-    .subtitle {
-      color: #aaa;
-      font-size: 14px;
-      margin-bottom: 18px;
-    }
+.subtitle {
+  color: #aaa;
+  margin-bottom: 18px;
+}
 
-    video {
-      width: 100%;
-      max-height: 70vh;
-      background: #000;
-      border-radius: 18px;
-      object-fit: cover;
-    }
+video {
+  width: 100%;
+  background: black;
+  border-radius: 18px;
+  display: block;
+}
 
-    .timer {
-      font-size: 25px;
-      font-weight: bold;
-      margin: 12px 0;
-    }
+.timer {
+  font-size: 25px;
+  font-weight: bold;
+  margin: 12px;
+}
 
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-    }
+.controls {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
 
-    button {
-      border: none;
-      border-radius: 12px;
-      padding: 13px 18px;
-      font-size: 15px;
-      cursor: pointer;
-      color: white;
-    }
+button {
+  border: 0;
+  border-radius: 12px;
+  padding: 13px 18px;
+  font-size: 15px;
+  cursor: pointer;
+  color: white;
+}
 
-    #permissionBtn {
-      background: #2196f3;
-    }
+#permissionBtn {
+  background: #2196f3;
+}
 
-    #photoBtn {
-      background: #1976d2;
-      display: none;
-    }
+#photoBtn {
+  background: #1976d2;
+  display: none;
+}
 
-    #recordBtn {
-      background: #e53935;
-      display: none;
-    }
+#recordBtn {
+  background: #e53935;
+  display: none;
+}
 
-    #stopBtn {
-      background: #ff9800;
-      display: none;
-    }
+#stopBtn {
+  background: #ff9800;
+  display: none;
+}
 
-    #switchBtn {
-      background: #444;
-      display: none;
-    }
+#switchBtn {
+  background: #444;
+  display: none;
+}
 
-    #status {
-      margin-top: 18px;
-      min-height: 24px;
-      color: #ddd;
-    }
+#sendBtn {
+  background: #16a085;
+  display: none;
+}
 
-    .recording {
-      color: #ff5252 !important;
-      font-weight: bold;
-    }
+#status {
+  margin-top: 18px;
+  min-height: 25px;
+  color: #ddd;
+}
 
-    canvas {
-      display: none;
-    }
-  </style>
+.recording {
+  color: #ff5252 !important;
+  font-weight: bold;
+}
+
+canvas {
+  display: none;
+}
+</style>
 </head>
 
 <body>
 
 <div class="container">
 
-  <h1>📷 Camera Studio</h1>
+<h1>📷 Camera Studio</h1>
 
-  <div class="subtitle">
-    Photo ya video capture karein
-  </div>
+<div class="subtitle">
+Photo ya video capture karein
+</div>
 
-  <button id="permissionBtn">
-    📷 Allow Camera & Microphone
-  </button>
+<button id="permissionBtn">
+📷 Allow Camera & Microphone
+</button>
 
-  <video id="preview" autoplay muted playsinline></video>
+<video id="preview" autoplay muted playsinline></video>
 
-  <div id="timer" class="timer">
-    00:00
-  </div>
+<div id="timer" class="timer">
+00:00
+</div>
 
-  <div class="controls">
+<div class="controls">
 
-    <button id="photoBtn">
-      📸 Take Photo
-    </button>
+<button id="photoBtn">
+📸 Take Photo
+</button>
 
-    <button id="recordBtn">
-      🔴 Start Video
-    </button>
+<button id="recordBtn">
+🔴 Start Video
+</button>
 
-    <button id="stopBtn">
-      ⏹ Stop Video
-    </button>
+<button id="stopBtn">
+⏹ Stop Video
+</button>
 
-    <button id="switchBtn">
-      🔄 Switch Camera
-    </button>
+<button id="switchBtn">
+🔄 Switch Camera
+</button>
 
-  </div>
+<button id="sendBtn">
+📤 Send to Drive
+</button>
 
-  <div id="status">
-    Camera permission ka wait ho raha hai...
-  </div>
+</div>
 
-  <canvas id="canvas"></canvas>
+<div id="status">
+Camera permission ka wait ho raha hai...
+</div>
+
+<canvas id="canvas"></canvas>
 
 </div>
 
 <script>
 
-const permissionBtn = document.getElementById("permissionBtn");
-const photoBtn = document.getElementById("photoBtn");
-const recordBtn = document.getElementById("recordBtn");
-const stopBtn = document.getElementById("stopBtn");
-const switchBtn = document.getElementById("switchBtn");
+const API_URL =
+"https://script.google.com/macros/s/AKfycbwSzubRgfKRJ65hA3ieMPabu8wiwM2REcvxkcLwntx5yEpQn0MpWFlhCbiHd6MwSbYM/exec";
 
-const preview = document.getElementById("preview");
-const status = document.getElementById("status");
-const timer = document.getElementById("timer");
-const canvas = document.getElementById("canvas");
+
+const permissionBtn =
+document.getElementById("permissionBtn");
+
+const photoBtn =
+document.getElementById("photoBtn");
+
+const recordBtn =
+document.getElementById("recordBtn");
+
+const stopBtn =
+document.getElementById("stopBtn");
+
+const switchBtn =
+document.getElementById("switchBtn");
+
+const sendBtn =
+document.getElementById("sendBtn");
+
+const preview =
+document.getElementById("preview");
+
+const status =
+document.getElementById("status");
+
+const timer =
+document.getElementById("timer");
+
+const canvas =
+document.getElementById("canvas");
+
 
 let stream = null;
+
 let recorder = null;
+
 let chunks = [];
+
+let currentBlob = null;
+
+let currentType = null;
 
 let facingMode = "user";
 
-let timerInterval = null;
 let seconds = 0;
+
+let timerInterval = null;
 
 
 /* =========================
-   CAMERA + MICROPHONE
+   CAMERA
 ========================= */
 
 async function startCamera() {
@@ -188,19 +226,20 @@ async function startCamera() {
   try {
 
     if (stream) {
-      stream.getTracks().forEach(track => track.stop());
+
+      stream
+      .getTracks()
+      .forEach(track => track.stop());
+
     }
 
-    stream = await navigator.mediaDevices.getUserMedia({
+    stream =
+    await navigator.mediaDevices.getUserMedia({
 
       video: {
         facingMode: facingMode,
-        width: {
-          ideal: 1280
-        },
-        height: {
-          ideal: 720
-        }
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
       },
 
       audio: true
@@ -216,43 +255,45 @@ async function startCamera() {
     switchBtn.style.display = "inline-block";
 
     status.textContent =
-      "✅ Camera aur microphone ready.";
+    "✅ Camera aur microphone ready.";
 
   }
 
-  catch (error) {
+  catch(error) {
 
     console.error(error);
 
     status.textContent =
-      "❌ Permission error: " + error.name;
+    "❌ Permission error: " +
+    error.name;
 
   }
 
 }
 
 
-permissionBtn.addEventListener(
-  "click",
-  startCamera
-);
+permissionBtn.onclick = startCamera;
 
 
 /* =========================
    PHOTO
 ========================= */
 
-photoBtn.addEventListener("click", () => {
+photoBtn.onclick = () => {
 
   if (!stream) return;
 
-  const width = preview.videoWidth;
-  const height = preview.videoHeight;
+  const width =
+  preview.videoWidth;
+
+  const height =
+  preview.videoHeight;
 
   canvas.width = width;
   canvas.height = height;
 
-  const ctx = canvas.getContext("2d");
+  const ctx =
+  canvas.getContext("2d");
 
   ctx.drawImage(
     preview,
@@ -263,47 +304,33 @@ photoBtn.addEventListener("click", () => {
   );
 
   canvas.toBlob(
-    (blob) => {
+    blob => {
 
-      const url = URL.createObjectURL(blob);
+      currentBlob = blob;
 
-      const a = document.createElement("a");
+      currentType = "photo";
 
-      a.href = url;
-      a.download =
-        "photo_" +
-        Date.now() +
-        ".jpg";
-
-      /*
-       IMPORTANT:
-       Ye sirf testing ke liye
-       browser download hai.
-      */
-
-      a.click();
-
-      URL.revokeObjectURL(url);
+      sendBtn.style.display =
+      "inline-block";
 
       status.textContent =
-        "📸 Photo captured.";
+      "📸 Photo ready. Send button dabayein.";
 
     },
 
     "image/jpeg",
 
     0.9
-
   );
 
-});
+};
 
 
 /* =========================
    START VIDEO
 ========================= */
 
-recordBtn.addEventListener("click", () => {
+recordBtn.onclick = () => {
 
   if (!stream) return;
 
@@ -318,7 +345,7 @@ recordBtn.addEventListener("click", () => {
   ) {
 
     mimeType =
-      "video/webm;codecs=vp9,opus";
+    "video/webm;codecs=vp9,opus";
 
   }
 
@@ -328,19 +355,22 @@ recordBtn.addEventListener("click", () => {
     )
   ) {
 
-    mimeType = "video/webm";
+    mimeType =
+    "video/webm";
 
   }
 
-  recorder = mimeType
-    ? new MediaRecorder(
-        stream,
-        { mimeType: mimeType }
-      )
-    : new MediaRecorder(stream);
+  recorder =
+  mimeType
+  ? new MediaRecorder(
+      stream,
+      { mimeType }
+    )
+  : new MediaRecorder(stream);
 
 
-  recorder.ondataavailable = event => {
+  recorder.ondataavailable =
+  event => {
 
     if (event.data.size > 0) {
       chunks.push(event.data);
@@ -349,67 +379,76 @@ recordBtn.addEventListener("click", () => {
   };
 
 
-  recorder.onstop = saveVideo;
+  recorder.onstop =
+  createVideo;
 
 
   recorder.start(1000);
 
 
-  recordBtn.style.display = "none";
-  photoBtn.style.display = "none";
-  switchBtn.style.display = "none";
+  recordBtn.style.display =
+  "none";
 
-  stopBtn.style.display = "inline-block";
+  photoBtn.style.display =
+  "none";
+
+  switchBtn.style.display =
+  "none";
+
+  stopBtn.style.display =
+  "inline-block";
+
+  sendBtn.style.display =
+  "none";
 
 
   seconds = 0;
 
-  timer.textContent = "00:00";
+  timer.textContent =
+  "00:00";
 
   status.textContent =
-    "🔴 Recording...";
+  "🔴 Recording...";
 
-  status.classList.add("recording");
+  status.classList.add(
+    "recording"
+  );
 
 
-  timerInterval = setInterval(() => {
+  timerInterval =
+  setInterval(() => {
 
     seconds++;
 
     const minutes =
-      Math.floor(seconds / 60);
+    Math.floor(seconds / 60);
 
     const secs =
-      seconds % 60;
+    seconds % 60;
 
     timer.textContent =
-      String(minutes).padStart(2, "0")
-      + ":" +
-      String(secs).padStart(2, "0");
+    String(minutes).padStart(2, "0")
+    + ":" +
+    String(secs).padStart(2, "0");
 
-
-    /*
-      Maximum recording time:
-      5 minutes
-    */
 
     if (seconds >= 300) {
+
       stopRecording();
+
     }
 
   }, 1000);
 
-});
+};
 
 
 /* =========================
-   STOP VIDEO
+   STOP
 ========================= */
 
-stopBtn.addEventListener(
-  "click",
-  stopRecording
-);
+stopBtn.onclick =
+stopRecording;
 
 
 function stopRecording() {
@@ -425,64 +464,52 @@ function stopRecording() {
 
   clearInterval(timerInterval);
 
-  stopBtn.style.display = "none";
+  stopBtn.style.display =
+  "none";
 
-  photoBtn.style.display = "inline-block";
-  recordBtn.style.display = "inline-block";
-  switchBtn.style.display = "inline-block";
+  photoBtn.style.display =
+  "inline-block";
 
-  status.classList.remove("recording");
+  recordBtn.style.display =
+  "inline-block";
+
+  switchBtn.style.display =
+  "inline-block";
+
+  status.classList.remove(
+    "recording"
+  );
 
   status.textContent =
-    "⏳ Video prepare ho raha hai...";
+  "⏳ Video prepare ho raha hai...";
 
 }
 
 
 /* =========================
-   SAVE VIDEO — TEST
+   VIDEO READY
 ========================= */
 
-function saveVideo() {
+function createVideo() {
 
-  const blob = new Blob(
+  currentBlob =
+  new Blob(
     chunks,
     {
       type:
-        recorder.mimeType ||
-        "video/webm"
+      recorder.mimeType ||
+      "video/webm"
     }
   );
 
+  currentType =
+  "video";
 
-  /*
-    Abhi sirf testing ke liye
-    video phone/browser me download hoga.
-
-    Next step me isi jagah
-    Google Drive upload lagayenge.
-  */
-
-  const url =
-    URL.createObjectURL(blob);
-
-  const a =
-    document.createElement("a");
-
-  a.href = url;
-
-  a.download =
-    "video_" +
-    Date.now() +
-    ".webm";
-
-  a.click();
-
-  URL.revokeObjectURL(url);
-
+  sendBtn.style.display =
+  "inline-block";
 
   status.textContent =
-    "✅ Video recording complete.";
+  "🎥 Video ready. Send button dabayein.";
 
 }
 
@@ -491,24 +518,183 @@ function saveVideo() {
    SWITCH CAMERA
 ========================= */
 
-switchBtn.addEventListener(
-  "click",
-  async () => {
+switchBtn.onclick =
+async () => {
 
-    if (recorder &&
-        recorder.state === "recording") {
-      return;
-    }
+  if (
+    recorder &&
+    recorder.state === "recording"
+  ) {
+    return;
+  }
 
-    facingMode =
-      facingMode === "user"
-        ? "environment"
-        : "user";
+  facingMode =
+  facingMode === "user"
+  ? "environment"
+  : "user";
 
-    await startCamera();
+  await startCamera();
+
+};
+
+
+/* =========================
+   SEND TO DRIVE
+========================= */
+
+sendBtn.onclick =
+async () => {
+
+  if (!currentBlob) {
+
+    status.textContent =
+    "❌ Pehle photo ya video capture karein.";
+
+    return;
 
   }
-);
+
+
+  sendBtn.disabled = true;
+
+  status.textContent =
+  "⏳ File prepare ho rahi hai...";
+
+
+  try {
+
+    const base64 =
+    await blobToBase64(
+      currentBlob
+    );
+
+
+    let extension;
+
+    if (currentType === "photo") {
+
+      extension = "jpg";
+
+    } else {
+
+      extension = "webm";
+
+    }
+
+
+    const fileName =
+    currentType +
+    "_" +
+    Date.now() +
+    "." +
+    extension;
+
+
+    status.textContent =
+    "☁️ Google Drive par upload ho raha hai...";
+
+
+    /*
+      text/plain use kar rahe hain
+      taaki browser unnecessary
+      CORS preflight na bheje.
+    */
+
+    const response =
+    await fetch(
+      API_URL,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+          "text/plain;charset=utf-8"
+        },
+
+        body: JSON.stringify({
+
+          base64: base64,
+
+          fileName: fileName,
+
+          mimeType:
+          currentBlob.type
+
+        })
+      }
+    );
+
+
+    /*
+      Apps Script redirect ki wajah se
+      kuch browsers response ko read nahi
+      kar pa sakte. Request complete hone
+      par success message dikhayenge.
+    */
+
+    if (response.ok) {
+
+      status.textContent =
+      "✅ File Drive par send ho gayi.";
+
+    } else {
+
+      status.textContent =
+      "⚠️ Upload request complete nahi hui.";
+
+    }
+
+  }
+
+  catch(error) {
+
+    console.error(error);
+
+    status.textContent =
+    "⚠️ Upload request bheji gayi. Drive check karein.";
+
+  }
+
+
+  sendBtn.disabled = false;
+
+};
+
+
+/* =========================
+   BLOB → BASE64
+========================= */
+
+function blobToBase64(blob) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      const reader =
+      new FileReader();
+
+      reader.onloadend =
+      () => {
+
+        const result =
+        reader.result;
+
+        const base64 =
+        result.split(",")[1];
+
+        resolve(base64);
+
+      };
+
+      reader.onerror =
+      reject;
+
+      reader.readAsDataURL(blob);
+
+    }
+  );
+
+}
 
 </script>
 
