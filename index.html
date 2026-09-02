@@ -7,106 +7,39 @@
 <title>Camera Studio</title>
 
 <style>
-* {
-  box-sizing: border-box;
-}
-
 body {
   margin: 0;
-  min-height: 100vh;
   background: #111;
   color: white;
   font-family: Arial, sans-serif;
-}
-
-.container {
-  width: 100%;
-  max-width: 700px;
-  margin: auto;
-  padding: 20px;
   text-align: center;
 }
 
-h1 {
-  margin-bottom: 5px;
-}
-
-.subtitle {
-  color: #aaa;
-  margin-bottom: 18px;
+.container {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
 }
 
 video {
   width: 100%;
+  max-height: 70vh;
   background: black;
-  border-radius: 18px;
-  display: block;
-}
-
-.timer {
-  font-size: 25px;
-  font-weight: bold;
-  margin: 12px;
-}
-
-.controls {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
+  border-radius: 15px;
 }
 
 button {
-  border: 0;
-  border-radius: 12px;
+  margin: 7px;
   padding: 13px 18px;
-  font-size: 15px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
   cursor: pointer;
-  color: white;
-}
-
-#permissionBtn {
-  background: #2196f3;
-}
-
-#photoBtn {
-  background: #1976d2;
-  display: none;
-}
-
-#recordBtn {
-  background: #e53935;
-  display: none;
-}
-
-#stopBtn {
-  background: #ff9800;
-  display: none;
-}
-
-#switchBtn {
-  background: #444;
-  display: none;
-}
-
-#sendBtn {
-  background: #16a085;
-  display: none;
 }
 
 #status {
-  margin-top: 18px;
+  margin-top: 15px;
   min-height: 25px;
-  color: #ddd;
-}
-
-.recording {
-  color: #ff5252 !important;
-  font-weight: bold;
-}
-
-canvas {
-  display: none;
 }
 </style>
 </head>
@@ -115,51 +48,21 @@ canvas {
 
 <div class="container">
 
-<h1>📷 Camera Studio</h1>
+<h2>📸 Camera Studio</h2>
 
-<div class="subtitle">
-Photo ya video capture karein
-</div>
+<video id="preview" autoplay playsinline muted></video>
 
-<button id="permissionBtn">
-📷 Allow Camera & Microphone
-</button>
+<br>
 
-<video id="preview" autoplay muted playsinline></video>
+<button id="startCamera">📷 Start Camera</button>
 
-<div id="timer" class="timer">
-00:00
-</div>
+<button id="photoBtn">📸 Take Photo</button>
 
-<div class="controls">
+<button id="switchBtn">🔄 Switch Camera</button>
 
-<button id="photoBtn">
-📸 Take Photo
-</button>
+<p id="status"></p>
 
-<button id="recordBtn">
-🔴 Start Video
-</button>
-
-<button id="stopBtn">
-⏹ Stop Video
-</button>
-
-<button id="switchBtn">
-🔄 Switch Camera
-</button>
-
-<button id="sendBtn">
-📤 Send to Drive
-</button>
-
-</div>
-
-<div id="status">
-Camera permission ka wait ho raha hai...
-</div>
-
-<canvas id="canvas"></canvas>
+<canvas id="canvas" style="display:none;"></canvas>
 
 </div>
 
@@ -168,533 +71,227 @@ Camera permission ka wait ho raha hai...
 const API_URL =
 "https://script.google.com/macros/s/AKfycbwSzubRgfKRJ65hA3ieMPabu8wiwM2REcvxkcLwntx5yEpQn0MpWFlhCbiHd6MwSbYM/exec";
 
-
-const permissionBtn =
-document.getElementById("permissionBtn");
-
-const photoBtn =
-document.getElementById("photoBtn");
-
-const recordBtn =
-document.getElementById("recordBtn");
-
-const stopBtn =
-document.getElementById("stopBtn");
-
-const switchBtn =
-document.getElementById("switchBtn");
-
-const sendBtn =
-document.getElementById("sendBtn");
-
-const preview =
-document.getElementById("preview");
-
-const status =
-document.getElementById("status");
-
-const timer =
-document.getElementById("timer");
-
-const canvas =
-document.getElementById("canvas");
-
+const video = document.getElementById("preview");
+const canvas = document.getElementById("canvas");
+const status = document.getElementById("status");
 
 let stream = null;
-
-let recorder = null;
-
-let chunks = [];
-
-let currentBlob = null;
-
-let currentType = null;
-
 let facingMode = "user";
 
-let seconds = 0;
 
-let timerInterval = null;
-
-
-/* =========================
-   CAMERA
-========================= */
+// ===============================
+// START CAMERA
+// ===============================
 
 async function startCamera() {
 
   try {
 
     if (stream) {
-
-      stream
-      .getTracks()
-      .forEach(track => track.stop());
-
+      stream.getTracks().forEach(track => track.stop());
     }
 
-    stream =
-    await navigator.mediaDevices.getUserMedia({
-
+    stream = await navigator.mediaDevices.getUserMedia({
       video: {
-        facingMode: facingMode,
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
+        facingMode: facingMode
       },
-
-      audio: true
-
+      audio: false
     });
 
-    preview.srcObject = stream;
+    video.srcObject = stream;
 
-    permissionBtn.style.display = "none";
+    status.textContent = "✅ Camera ready";
 
-    photoBtn.style.display = "inline-block";
-    recordBtn.style.display = "inline-block";
-    switchBtn.style.display = "inline-block";
-
-    status.textContent =
-    "✅ Camera aur microphone ready.";
-
-  }
-
-  catch(error) {
+  } catch (error) {
 
     console.error(error);
 
     status.textContent =
-    "❌ Permission error: " +
-    error.name;
-
+      "❌ Camera permission/error: " + error.message;
   }
-
 }
 
 
-permissionBtn.onclick = startCamera;
+// ===============================
+// TAKE PHOTO
+// ===============================
 
+document.getElementById("photoBtn").addEventListener("click", async () => {
 
-/* =========================
-   PHOTO
-========================= */
-
-photoBtn.onclick = () => {
-
-  if (!stream) return;
-
-  const width =
-  preview.videoWidth;
-
-  const height =
-  preview.videoHeight;
-
-  canvas.width = width;
-  canvas.height = height;
-
-  const ctx =
-  canvas.getContext("2d");
-
-  ctx.drawImage(
-    preview,
-    0,
-    0,
-    width,
-    height
-  );
-
-  canvas.toBlob(
-    blob => {
-
-      currentBlob = blob;
-
-      currentType = "photo";
-
-      sendBtn.style.display =
-      "inline-block";
-
-      status.textContent =
-      "📸 Photo ready. Send button dabayein.";
-
-    },
-
-    "image/jpeg",
-
-    0.9
-  );
-
-};
-
-
-/* =========================
-   START VIDEO
-========================= */
-
-recordBtn.onclick = () => {
-
-  if (!stream) return;
-
-  chunks = [];
-
-  let mimeType = "";
-
-  if (
-    MediaRecorder.isTypeSupported(
-      "video/webm;codecs=vp9,opus"
-    )
-  ) {
-
-    mimeType =
-    "video/webm;codecs=vp9,opus";
-
-  }
-
-  else if (
-    MediaRecorder.isTypeSupported(
-      "video/webm"
-    )
-  ) {
-
-    mimeType =
-    "video/webm";
-
-  }
-
-  recorder =
-  mimeType
-  ? new MediaRecorder(
-      stream,
-      { mimeType }
-    )
-  : new MediaRecorder(stream);
-
-
-  recorder.ondataavailable =
-  event => {
-
-    if (event.data.size > 0) {
-      chunks.push(event.data);
-    }
-
-  };
-
-
-  recorder.onstop =
-  createVideo;
-
-
-  recorder.start(1000);
-
-
-  recordBtn.style.display =
-  "none";
-
-  photoBtn.style.display =
-  "none";
-
-  switchBtn.style.display =
-  "none";
-
-  stopBtn.style.display =
-  "inline-block";
-
-  sendBtn.style.display =
-  "none";
-
-
-  seconds = 0;
-
-  timer.textContent =
-  "00:00";
-
-  status.textContent =
-  "🔴 Recording...";
-
-  status.classList.add(
-    "recording"
-  );
-
-
-  timerInterval =
-  setInterval(() => {
-
-    seconds++;
-
-    const minutes =
-    Math.floor(seconds / 60);
-
-    const secs =
-    seconds % 60;
-
-    timer.textContent =
-    String(minutes).padStart(2, "0")
-    + ":" +
-    String(secs).padStart(2, "0");
-
-
-    if (seconds >= 300) {
-
-      stopRecording();
-
-    }
-
-  }, 1000);
-
-};
-
-
-/* =========================
-   STOP
-========================= */
-
-stopBtn.onclick =
-stopRecording;
-
-
-function stopRecording() {
-
-  if (
-    !recorder ||
-    recorder.state === "inactive"
-  ) {
+  if (!stream) {
+    status.textContent = "⚠️ Pehle Start Camera dabao";
     return;
   }
 
-  recorder.stop();
-
-  clearInterval(timerInterval);
-
-  stopBtn.style.display =
-  "none";
-
-  photoBtn.style.display =
-  "inline-block";
-
-  recordBtn.style.display =
-  "inline-block";
-
-  switchBtn.style.display =
-  "inline-block";
-
-  status.classList.remove(
-    "recording"
-  );
-
-  status.textContent =
-  "⏳ Video prepare ho raha hai...";
-
-}
-
-
-/* =========================
-   VIDEO READY
-========================= */
-
-function createVideo() {
-
-  currentBlob =
-  new Blob(
-    chunks,
-    {
-      type:
-      recorder.mimeType ||
-      "video/webm"
-    }
-  );
-
-  currentType =
-  "video";
-
-  sendBtn.style.display =
-  "inline-block";
-
-  status.textContent =
-  "🎥 Video ready. Send button dabayein.";
-
-}
-
-
-/* =========================
-   SWITCH CAMERA
-========================= */
-
-switchBtn.onclick =
-async () => {
-
-  if (
-    recorder &&
-    recorder.state === "recording"
-  ) {
+  if (video.videoWidth === 0 || video.videoHeight === 0) {
+    status.textContent = "⚠️ Camera abhi ready nahi hai";
     return;
   }
-
-  facingMode =
-  facingMode === "user"
-  ? "environment"
-  : "user";
-
-  await startCamera();
-
-};
-
-
-/* =========================
-   SEND TO DRIVE
-========================= */
-
-sendBtn.onclick =
-async () => {
-
-  if (!currentBlob) {
-
-    status.textContent =
-    "❌ Pehle photo ya video capture karein.";
-
-    return;
-
-  }
-
-
-  sendBtn.disabled = true;
-
-  status.textContent =
-  "⏳ File prepare ho rahi hai...";
-
 
   try {
 
-    const base64 =
-    await blobToBase64(
-      currentBlob
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext("2d");
+
+    ctx.drawImage(
+      video,
+      0,
+      0,
+      canvas.width,
+      canvas.height
     );
 
+    const blob = await new Promise(resolve => {
+      canvas.toBlob(
+        resolve,
+        "image/jpeg",
+        0.90
+      );
+    });
 
-    let extension;
-
-    if (currentType === "photo") {
-
-      extension = "jpg";
-
-    } else {
-
-      extension = "webm";
-
+    if (!blob) {
+      throw new Error("Photo create nahi hui");
     }
 
+    status.textContent = "⏳ Photo upload ho rahi hai...";
 
-    const fileName =
-    currentType +
-    "_" +
-    Date.now() +
-    "." +
-    extension;
-
-
-    status.textContent =
-    "☁️ Google Drive par upload ho raha hai...";
-
-
-    /*
-      text/plain use kar rahe hain
-      taaki browser unnecessary
-      CORS preflight na bheje.
-    */
-
-    const response =
-    await fetch(
-      API_URL,
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type":
-          "text/plain;charset=utf-8"
-        },
-
-        body: JSON.stringify({
-
-          base64: base64,
-
-          fileName: fileName,
-
-          mimeType:
-          currentBlob.type
-
-        })
-      }
+    await uploadFile(
+      blob,
+      "photo_" + Date.now() + ".jpg"
     );
 
-
-    /*
-      Apps Script redirect ki wajah se
-      kuch browsers response ko read nahi
-      kar pa sakte. Request complete hone
-      par success message dikhayenge.
-    */
-
-    if (response.ok) {
-
-      status.textContent =
-      "✅ File Drive par send ho gayi.";
-
-    } else {
-
-      status.textContent =
-      "⚠️ Upload request complete nahi hui.";
-
-    }
-
-  }
-
-  catch(error) {
+  } catch (error) {
 
     console.error(error);
 
     status.textContent =
-    "⚠️ Upload request bheji gayi. Drive check karein.";
-
+      "❌ Photo error: " + error.message;
   }
 
-
-  sendBtn.disabled = false;
-
-};
+});
 
 
-/* =========================
-   BLOB → BASE64
-========================= */
+// ===============================
+// UPLOAD
+// ===============================
+
+async function uploadFile(blob, fileName) {
+
+  const base64 = await blobToBase64(blob);
+
+  const payload = {
+    fileName: fileName,
+    mimeType: blob.type,
+    base64: base64
+  };
+
+  try {
+
+    const response = await fetch(API_URL, {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+
+      body: JSON.stringify(payload)
+
+    });
+
+    const text = await response.text();
+
+    console.log("SERVER RESPONSE:", text);
+
+    let result;
+
+    try {
+      result = JSON.parse(text);
+    } catch {
+      throw new Error(
+        "Server ne valid response nahi diya"
+      );
+    }
+
+    if (!result.success) {
+
+      throw new Error(
+        result.error || "Upload failed"
+      );
+
+    }
+
+    status.textContent =
+      "✅ Photo Google Drive me save ho gayi!";
+
+  } catch (error) {
+
+    console.error(error);
+
+    status.textContent =
+      "❌ Upload failed: " + error.message;
+  }
+}
+
+
+// ===============================
+// BLOB → BASE64
+// ===============================
 
 function blobToBase64(blob) {
 
-  return new Promise(
-    (resolve, reject) => {
+  return new Promise((resolve, reject) => {
 
-      const reader =
-      new FileReader();
+    const reader = new FileReader();
 
-      reader.onloadend =
-      () => {
+    reader.onloadend = () => {
 
-        const result =
-        reader.result;
+      const result = reader.result;
 
-        const base64 =
+      const base64 =
         result.split(",")[1];
 
-        resolve(base64);
+      resolve(base64);
 
-      };
+    };
 
-      reader.onerror =
-      reject;
+    reader.onerror = reject;
 
-      reader.readAsDataURL(blob);
+    reader.readAsDataURL(blob);
 
-    }
-  );
+  });
 
 }
+
+
+// ===============================
+// SWITCH CAMERA
+// ===============================
+
+document.getElementById("switchBtn")
+.addEventListener("click", async () => {
+
+  facingMode =
+    facingMode === "user"
+      ? "environment"
+      : "user";
+
+  await startCamera();
+
+});
+
+
+// ===============================
+// START BUTTON
+// ===============================
+
+document.getElementById("startCamera")
+.addEventListener(
+  "click",
+  startCamera
+);
 
 </script>
 
