@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Camera Studio Pro</title>
+<title>Camera Studio</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
@@ -82,7 +82,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:
 .pv{position:fixed;inset:0;display:none;background:#000;z-index:100;flex-direction:column}
 .pv.on{display:flex}
 .pv-c{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-.pv-c img,.pv-c video,.pv-c audio{max-width:100%;max-height:100%;object-fit:contain}
+.pv-c img,.pv-c video{max-width:100%;max-height:100%;object-fit:contain}
 .pv-top{position:absolute;top:0;left:0;right:0;padding:max(18px,env(safe-area-inset-top)) 18px;z-index:5;display:flex;justify-content:space-between;align-items:center}
 .cl{width:44px;height:44px;border:0;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .pvb{padding:6px 12px;border-radius:15px;font-size:12px;font-weight:bold;backdrop-filter:blur(10px)}
@@ -105,12 +105,10 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:
 .tt.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* Loader */
-.ld{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);z-index:500}
+.ld{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);z-index:500}
 .ld.on{display:flex}
 .sp{width:42px;height:42px;border:4px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:sn .8s linear infinite}
 @keyframes sn{to{transform:rotate(360deg)}}
-.prog{width:200px;height:6px;border-radius:3px;background:rgba(255,255,255,0.15);overflow:hidden}
-.prog-fill{height:100%;width:0%;background:#22c55e;border-radius:3px;transition:width 0.3s}
 
 @media(min-width:700px){.app{max-width:500px;margin:auto;box-shadow:0 0 80px rgba(0,0,0,.8)}}
 </style>
@@ -121,7 +119,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:
 <div class="perm" id="P">
   <div class="perm-icon">📸</div>
   <h2>Camera & Mic Access</h2>
-  <p>Photo, Video aur Audio ke liye Camera aur Microphone allow karein.</p>
+  <p>Photo, Video aur Audio capture karne ke liye Allow karein.</p>
   <button class="perm-btn" onclick="grant()">✅ Allow Camera & Mic</button>
 </div>
 
@@ -187,8 +185,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:
 <!-- Loader -->
 <div class="ld" id="LD">
   <div class="sp"></div>
-  <div id="LT">Sending...</div>
-  <div class="prog"><div class="prog-fill" id="PF"></div></div>
+  <div id="LT">Uploading to Google Drive...</div>
 </div>
 
 <script>
@@ -208,23 +205,22 @@ PVC=document.getElementById("PVC"),
 PVB=document.getElementById("PVB"),
 SD=document.getElementById("SD"),
 RT=document.getElementById("RT"),
-CL=document.getElementById("closePreview")||document.getElementById("CL"),
+CL=document.getElementById("CL"),
 LD=document.getElementById("LD"),
 LT=document.getElementById("LT"),
-PF=document.getElementById("PF"),
 TO=document.getElementById("TO"),
 PM=document.getElementById("P"),
 AP=document.getElementById("A");
 
 let st=null,fc="user",md="photo",rec=null,ch=[],blob=null,ct="photo",ti=null,rs=0,fOn=false,cf="none";
 
-// CHUNK SIZE: 200KB
-const CHUNK=200000;
-
 /* Permission */
 async function grant(){
   try{
-    st=await navigator.mediaDevices.getUserMedia({video:{facingMode:fc,width:{ideal:1920},height:{ideal:1080}},audio:true});
+    st=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:fc,width:{ideal:1280},height:{ideal:720}},
+      audio:true
+    });
     C.srcObject=st;await C.play();
     if(fc==="user")C.classList.add("mirror");
     PM.classList.add("hide");AP.style.display="block";
@@ -244,7 +240,10 @@ async function reCam(){
   if(st)st.getTracks().forEach(t=>t.stop());
   fOn=false;FL.classList.remove("flash-on");
   try{
-    st=await navigator.mediaDevices.getUserMedia({video:{facingMode:fc,width:{ideal:1920},height:{ideal:1080}},audio:true});
+    st=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:fc,width:{ideal:1280},height:{ideal:720}},
+      audio:true
+    });
     C.srcObject=st;await C.play();C.classList.toggle("mirror",fc==="user");
   }catch(e){
     try{st=await navigator.mediaDevices.getUserMedia({video:{facingMode:fc}});C.srcObject=st;await C.play();C.classList.toggle("mirror",fc==="user");}
@@ -269,7 +268,7 @@ FL.onclick=async()=>{
   }catch(e){msg("Flash not supported")}
 };
 
-/* Filter toggle */
+/* Filters */
 FB.onclick=()=>FBR.classList.toggle("on");
 FBR.querySelectorAll(".fc").forEach(c=>{
   c.onclick=()=>{
@@ -280,7 +279,7 @@ FBR.querySelectorAll(".fc").forEach(c=>{
   }
 });
 
-/* Mode */
+/* Mode Tabs */
 document.querySelectorAll(".md").forEach(b=>{
   b.onclick=()=>{
     if(rec&&rec.state==="recording")return;
@@ -304,11 +303,13 @@ SH.onclick=()=>{
   else togAud();
 };
 
-/* Photo */
+/* Photo Capture (Optimized size ~150KB) */
 function snap(){
   if(!C.videoWidth){msg("Camera not ready");return}
   const cv=document.createElement("canvas");
-  cv.width=C.videoWidth;cv.height=C.videoHeight;
+  // Resize to max 1280x720 for fast upload
+  cv.width=C.videoWidth||1280;
+  cv.height=C.videoHeight||720;
   const cx=cv.getContext("2d");
   cx.filter=gf(cf);
   if(fc==="user"){cx.translate(cv.width,0);cx.scale(-1,1)}
@@ -316,7 +317,7 @@ function snap(){
   cv.toBlob(b=>{
     if(!b){msg("Failed");return}
     blob=b;ct="photo";showPV();
-  },"image/jpeg",0.85);
+  },"image/jpeg",0.75);
 }
 
 function gf(f){
@@ -329,15 +330,21 @@ function gf(f){
   }
 }
 
-/* Video */
+/* Video Recording (Optimized Bitrate ~800kbps) */
 function togVid(){
   if(rec&&rec.state==="recording"){
     rec.stop();clearInterval(ti);RI.classList.remove("on");SH.classList.remove("isrec");
   }else{
     ch=[];let m="video/webm";
-    if(MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus"))m="video/webm;codecs=vp9,opus";
-    else if(MediaRecorder.isTypeSupported("video/webm;codecs=vp8,opus"))m="video/webm;codecs=vp8,opus";
-    try{rec=new MediaRecorder(st,{mimeType:m})}catch(e){msg("Not supported");return}
+    if(MediaRecorder.isTypeSupported("video/webm;codecs=vp8,opus"))m="video/webm;codecs=vp8,opus";
+    else if(MediaRecorder.isTypeSupported("video/webm"))m="video/webm";
+    
+    try{
+      rec=new MediaRecorder(st,{mimeType:m, videoBitsPerSecond:800000});
+    }catch(e){
+      try{rec=new MediaRecorder(st)}catch(err){msg("Not supported");return}
+    }
+    
     rec.ondataavailable=e=>{if(e.data.size>0)ch.push(e.data)};
     rec.onstop=()=>{blob=new Blob(ch,{type:m});ct="video";showPV()};
     rec.start(1000);rs=Date.now();RI.classList.add("on");SH.classList.add("isrec");
@@ -345,14 +352,14 @@ function togVid(){
   }
 }
 
-/* Audio */
+/* Audio Recording */
 function togAud(){
   if(rec&&rec.state==="recording"){
     rec.stop();clearInterval(ti);RI.classList.remove("on");SH.classList.remove("isrec");
   }else{
     ch=[];const at=st.getAudioTracks();
     if(!at.length){msg("Mic not found!");return}
-    rec=new MediaRecorder(new MediaStream(at));
+    rec=new MediaRecorder(new MediaStream(at),{audioBitsPerSecond:64000});
     rec.ondataavailable=e=>{if(e.data.size>0)ch.push(e.data)};
     rec.onstop=()=>{blob=new Blob(ch,{type:"audio/webm"});ct="audio";showPV()};
     rec.start(1000);rs=Date.now();RI.classList.add("on");SH.classList.add("isrec");
@@ -364,7 +371,7 @@ function togAud(){
 function clk(){
   const s=Math.floor((Date.now()-rs)/1000);
   TT.textContent=String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
-  if(s>=300){if(rec&&rec.state==="recording")rec.stop();clearInterval(ti);RI.classList.remove("on");SH.classList.remove("isrec");msg("5 min limit")}
+  if(s>=180){if(rec&&rec.state==="recording")rec.stop();clearInterval(ti);RI.classList.remove("on");SH.classList.remove("isrec");msg("3 min limit")}
 }
 
 /* Preview */
@@ -379,7 +386,7 @@ function showPV(){
     PVC.appendChild(v);PVB.textContent="🎥 Video";PVB.className="pvb pvb-v";
   }else{
     const bx=document.createElement("div");bx.className="apb";
-    bx.innerHTML='<div class="api">🎵</div><div class="apl">Audio Recording</div>';
+    bx.innerHTML='<div class="api">🎵</div><div class="apl">Audio Recording Ready</div>';
     const au=document.createElement("audio");au.src=URL.createObjectURL(blob);
     au.controls=true;au.autoplay=true;au.style.width="90%";bx.appendChild(au);
     PVC.appendChild(bx);PVB.textContent="🎙️ Audio";PVB.className="pvb pvb-a";
@@ -399,7 +406,7 @@ async function retake(){PV.classList.remove("on");PVC.innerHTML="";blob=null;awa
 RT.onclick=retake;CL.onclick=retake;
 TB.onclick=()=>{if(blob)showPV()};
 
-/* ===== CHUNKED UPLOAD TO DRIVE ===== */
+/* ===== DIRECT FAST UPLOAD (NO CACHE CRASH) ===== */
 SD.onclick=()=>{
   if(!blob){msg("Nothing to send");return}
   
@@ -408,100 +415,47 @@ SD.onclick=()=>{
   if(ct==="audio"){ext="webm";pre="audio_"}
   const fn=pre+Date.now()+"."+ext;
   
-  LT.textContent="Preparing upload...";
-  PF.style.width="0%";
+  LT.textContent="Uploading to Google Drive...";
   LD.classList.add("on");
   SD.disabled=true;
 
+  // Timeout guard (30 sec max)
+  const timeoutGuard = setTimeout(()=>{
+    LD.classList.remove("on");
+    SD.disabled=false;
+    msg("❌ Network timeout. Try again.");
+  }, 30000);
+
   const reader=new FileReader();
   reader.onloadend=()=>{
-    const b64=reader.result.split(",")[1];
-    doChunkedUpload(fn,blob.type,b64);
+    const b64=reader.result;
+    
+    google.script.run
+      .withSuccessHandler(function(res){
+        clearTimeout(timeoutGuard);
+        LD.classList.remove("on");
+        SD.disabled=false;
+        if(res && res.success){
+          msg(res.msg);
+          setTimeout(retake,1500);
+        }else{
+          msg(res ? res.msg : "Upload failed");
+        }
+      })
+      .withFailureHandler(function(err){
+        clearTimeout(timeoutGuard);
+        LD.classList.remove("on");
+        SD.disabled=false;
+        msg("❌ Error: " + err);
+      })
+      .uploadDirectToDrive(fn, blob.type, b64);
   };
   reader.readAsDataURL(blob);
 };
 
-function doChunkedUpload(fileName,mimeType,b64){
-  // Step 1: Start upload session
-  LT.textContent="Starting upload...";
-  
-  google.script.run
-    .withSuccessHandler(function(res){
-      if(!res.success){
-        LD.classList.remove("on");SD.disabled=false;
-        msg("❌ "+res.msg);return;
-      }
-      
-      const uploadId=res.uploadId;
-      const chunks=[];
-      
-      // Split base64 into chunks
-      for(let i=0;i<b64.length;i+=CHUNK){
-        chunks.push(b64.substring(i,i+CHUNK));
-      }
-      
-      const total=chunks.length;
-      let sent=0;
-      
-      LT.textContent="Uploading 0/"+total+" chunks...";
-      
-      // Send chunks one by one
-      function sendNext(){
-        if(sent>=total){
-          // All chunks sent -> finish
-          LT.textContent="Saving to Drive...";
-          PF.style.width="95%";
-          
-          google.script.run
-            .withSuccessHandler(function(fRes){
-              LD.classList.remove("on");SD.disabled=false;
-              PF.style.width="100%";
-              if(fRes.success){
-                msg(fRes.msg);
-                setTimeout(retake,1500);
-              }else{
-                msg(fRes.msg);
-              }
-            })
-            .withFailureHandler(function(err){
-              LD.classList.remove("on");SD.disabled=false;
-              msg("❌ Save Error");
-            })
-            .finishUpload(uploadId,total,mimeType);
-          return;
-        }
-        
-        google.script.run
-          .withSuccessHandler(function(cRes){
-            if(!cRes.success){
-              LD.classList.remove("on");SD.disabled=false;
-              msg("❌ Chunk error");return;
-            }
-            sent++;
-            const pct=Math.round((sent/total)*90);
-            PF.style.width=pct+"%";
-            LT.textContent="Uploading "+sent+"/"+total+" chunks...";
-            sendNext();
-          })
-          .withFailureHandler(function(err){
-            LD.classList.remove("on");SD.disabled=false;
-            msg("❌ Upload Error");
-          })
-          .uploadChunk(uploadId,sent,chunks[sent]);
-      }
-      
-      sendNext();
-    })
-    .withFailureHandler(function(err){
-      LD.classList.remove("on");SD.disabled=false;
-      msg("❌ Start Error");
-    })
-    .startUpload(fileName);
-}
-
 /* Toast */
 let tto;
-function msg(m){TO.textContent=m;TO.classList.add("on");clearTimeout(tto);tto=setTimeout(()=>TO.classList.remove("on"),3000)}
+function msg(m){TO.textContent=m;TO.classList.add("on");clearTimeout(tto);tto=setTimeout(()=>TO.classList.remove("on"),3500)}
 </script>
 </body>
 </html>
