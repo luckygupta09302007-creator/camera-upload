@@ -12,10 +12,13 @@ const CONFIG = {
     uploadTimeout: 30000, // 30 seconds
     photoQuality: 0.95,
     videoResolution: 1080,
-    apiUrl: 'https://script.google.com/macros/s/AKfycbyvl3TaTXfjQYhiDuaQY0S8LPMZVO9tpgqGUgda-pxSygzvivu9-0Tu2GF_IFwr8mSd/exec',
+    // ✅ UPDATED: Your Google Apps Script URL
+    apiUrl: 'https://script.google.com/macros/s/AKfycbzqYkkwvlEqG05CS_90pGI99fmEXFIdZHKgKkTAoxYvlQXC0KY62N0ecHdgUWU2T-A/exec',
+    // ✅ UPDATED: Your Google Drive Folder ID
+    driveFolder: '16Asd7SPzv2XsyQ4YkQNlilJSBYHQwq-4',
     supportedFormats: {
         photo: 'image/jpeg',
-        video: 'video/mp4'
+        video: 'video/webm'
     }
 };
 
@@ -241,7 +244,7 @@ async function requestCameraAccess() {
         elements.permissionScreen.classList.add('hidden');
         elements.cameraContainer.classList.add('active');
         
-        showToast('Camera ready', 'success');
+        showToast('📷 Camera ready!', 'success');
     } catch (error) {
         handleCameraError(error);
     }
@@ -306,7 +309,7 @@ async function toggleFlash() {
         await videoTrack.applyConstraints({ torch: state.torchEnabled });
         
         elements.flashBtn.classList.toggle('active', state.torchEnabled);
-        showToast(`Flash ${state.torchEnabled ? 'on' : 'off'}`, 'success');
+        showToast(`⚡ Flash ${state.torchEnabled ? 'on' : 'off'}`, 'success');
     } catch (error) {
         console.error('Flash error:', error);
         showToast('Could not toggle flash', 'error');
@@ -317,6 +320,7 @@ function toggleGrid() {
     state.gridEnabled = !state.gridEnabled;
     elements.gridOverlay.classList.toggle('active', state.gridEnabled);
     elements.gridBtn.classList.toggle('active', state.gridEnabled);
+    showToast(`⊞ Grid ${state.gridEnabled ? 'on' : 'off'}`, 'success');
 }
 
 function handleVideoClick(event) {
@@ -360,13 +364,6 @@ function switchMode(mode) {
     // Update UI
     elements.photoModeBtn.classList.toggle('active', mode === 'photo');
     elements.videoModeBtn.classList.toggle('active', mode === 'video');
-    
-    // Update button appearance
-    if (mode === 'video') {
-        elements.shutterBtn.innerHTML = '';
-    } else {
-        elements.shutterBtn.innerHTML = '';
-    }
 }
 
 // ============================================
@@ -439,7 +436,6 @@ function startRecording() {
         
         state.recordedChunks = [];
         
-        const audioTracks = state.stream.getAudioTracks();
         const videoTracks = state.stream.getVideoTracks();
         
         if (videoTracks.length === 0) {
@@ -480,7 +476,7 @@ function startRecording() {
                 }
             }, CONFIG.maxRecordingTime);
             
-            showToast('Recording started', 'success');
+            showToast('🎥 Recording started', 'success');
         };
         
         state.mediaRecorder.onstop = () => {
@@ -630,7 +626,7 @@ async function downloadMedia(type) {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         
-        showToast('Media downloaded successfully', 'success');
+        showToast('✅ Media downloaded successfully', 'success');
     } catch (error) {
         console.error('Download error:', error);
         showToast('Failed to download media', 'error');
@@ -655,7 +651,8 @@ async function uploadMedia(type) {
         elements.loadingText.textContent = `Uploading ${type}...`;
         
         const formData = new FormData();
-        formData.append('file', blob, `capture-${Date.now()}.${type === 'photo' ? 'jpg' : 'webm'}`);
+        const fileName = `Camera-${Date.now()}.${type === 'photo' ? 'jpg' : 'webm'}`;
+        formData.append('file', blob, fileName);
         formData.append('type', type);
         formData.append('timestamp', new Date().toISOString());
         
@@ -674,10 +671,17 @@ async function uploadMedia(type) {
             throw new Error(`Upload failed: ${response.statusText}`);
         }
         
+        const result = await response.json();
+        
         state.isUploading = false;
         elements.loadingOverlay.classList.remove('active');
         
-        showToast(`${type} uploaded successfully to Google Drive`, 'success');
+        if (result.success) {
+            showToast(`✅ ${type} uploaded to Google Drive!`, 'success');
+        } else {
+            throw new Error(result.error || 'Upload failed');
+        }
+        
         closePreview(type);
         
     } catch (error) {
@@ -745,7 +749,7 @@ function saveSettings() {
 }
 
 function openTimerSettings() {
-    showToast('Timer feature coming soon', 'info');
+    showToast('⏱️ Timer feature coming soon', 'info');
 }
 
 // ============================================
@@ -777,22 +781,25 @@ function playShutterSound() {
     const volumeLevel = parseFloat(elements.volumeSlider.value);
     if (volumeLevel === 0) return;
     
-    // Create a simple beep sound using Web Audio API
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.frequency.value = 800;
-    oscillator.type = 'sine';
-    
-    gainNode.gain.setValueAtTime(volumeLevel * 0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.1);
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = 800;
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(volumeLevel * 0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1);
+    } catch (e) {
+        console.log('Audio not available');
+    }
 }
 
 function handleKeyboardShortcuts(e) {
@@ -837,7 +844,6 @@ window.addEventListener('beforeunload', () => {
 });
 
 window.addEventListener('unload', () => {
-    // Revoke object URLs to free memory
     if (state.currentPhotoUrl) {
         URL.revokeObjectURL(state.currentPhotoUrl);
     }
@@ -846,7 +852,6 @@ window.addEventListener('unload', () => {
     }
 });
 
-// Handle visibility changes
 document.addEventListener('visibilitychange', () => {
     if (document.hidden && state.isRecording) {
         stopRecording();
