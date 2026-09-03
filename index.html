@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -822,7 +823,7 @@
         <!-- Video Preview -->
         <div class="preview-screen" id="videoPreview">
             <div class="preview-media-container">
-                <video class="preview-video" id="previewVideo" playsinline></video>
+                <video class="preview-video" id="previewVideo" playsinline controls></video>
                 <button class="preview-close-btn" id="videoPreviewCloseBtn" aria-label="Close">
                     <svg viewBox="0 0 24 24">
                         <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -830,20 +831,6 @@
                 </button>
             </div>
             <div class="preview-controls">
-                <div class="video-controls">
-                    <button class="video-play-btn" id="videoPlayBtn" aria-label="Play/Pause">
-                        <svg viewBox="0 0 24 24" id="playIcon">
-                            <path d="M8 5v14l11-7z"/>
-                        </svg>
-                        <svg viewBox="0 0 24 24" id="pauseIcon" style="display: none;">
-                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                        </svg>
-                    </button>
-                    <div class="video-timeline" id="videoTimeline">
-                        <div class="video-progress" id="videoProgress"></div>
-                    </div>
-                    <span class="video-time" id="videoTime">0:00 / 0:00</span>
-                </div>
                 <div class="preview-actions">
                     <button class="preview-btn secondary" id="videoRetakeBtn">
                         <svg viewBox="0 0 24 24">
@@ -882,8 +869,8 @@
         // Configuration
         // ============================================
         const CONFIG = {
-            maxRecordingTime: 5 * 60 * 1000, // 5 minutes
-            uploadTimeout: 30000, // 30 seconds
+            maxRecordingTime: 5 * 60 * 1000,
+            uploadTimeout: 30000,
             apiUrl: 'https://script.google.com/macros/s/AKfycbyvl3TaTXfjQYhiDuaQY0S8LPMZVO9tpgqGUgda-pxSygzvivu9-0Tu2GF_IFwr8mSd/exec'
         };
 
@@ -919,12 +906,6 @@
             videoPreview: document.getElementById('videoPreview'),
             previewVideo: document.getElementById('previewVideo'),
             videoPreviewCloseBtn: document.getElementById('videoPreviewCloseBtn'),
-            videoPlayBtn: document.getElementById('videoPlayBtn'),
-            playIcon: document.getElementById('playIcon'),
-            pauseIcon: document.getElementById('pauseIcon'),
-            videoTimeline: document.getElementById('videoTimeline'),
-            videoProgress: document.getElementById('videoProgress'),
-            videoTime: document.getElementById('videoTime'),
             videoRetakeBtn: document.getElementById('videoRetakeBtn'),
             videoDownloadBtn: document.getElementById('videoDownloadBtn'),
             videoSendBtn: document.getElementById('videoSendBtn'),
@@ -945,6 +926,7 @@
             recordedChunks: [],
             recordingStartTime: 0,
             recordingTimer: null,
+            recordingTimeoutId: null,
             torchEnabled: false,
             gridEnabled: false,
             currentPhotoBlob: null,
@@ -1078,48 +1060,69 @@
             const types = [
                 'video/webm;codecs=vp9,opus',
                 'video/webm;codecs=vp8,opus',
-                'video/webm;codecs=h264,opus',
+                'video/webm;codecs=vp9',
+                'video/webm;codecs=vp8',
                 'video/webm',
+                'video/mp4;codecs=avc1,mp4a',
                 'video/mp4'
             ];
 
             for (const type of types) {
                 if (MediaRecorder.isTypeSupported(type)) {
+                    console.log('Using MIME type:', type);
                     return type;
                 }
             }
 
-            return null;
+            return 'video/webm';
         }
 
         async function startRecording() {
             try {
-                if (!MediaRecorder) {
+                if (!window.MediaRecorder) {
                     showToast('Video recording is not supported on this browser');
                     return;
                 }
 
-                const mimeType = getSupportedMimeType();
-                if (!mimeType) {
-                    showToast('No supported video format available');
+                if (!state.stream || state.stream.getTracks().length === 0) {
+                    showToast('Camera stream not available');
                     return;
                 }
 
-                if (!state.stream) {
-                    await initCamera();
+                const audioTracks = state.stream.getAudioTracks();
+                if (audioTracks.length === 0) {
+                    console.warn('No audio track available');
                 }
 
+                const mimeType = getSupportedMimeType();
+                
                 state.recordedChunks = [];
-                state.mediaRecorder = new MediaRecorder(state.stream, { mimeType });
+
+                const options = {
+                    mimeType: mimeType,
+                    videoBitsPerSecond: 2500000
+                };
+
+                state.mediaRecorder = new MediaRecorder(state.stream, options);
 
                 state.mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) {
+                    if (event.data && event.data.size > 0) {
                         state.recordedChunks.push(event.data);
+                        console.log('Chunk received:', event.data.size, 'bytes');
                     }
                 };
 
                 state.mediaRecorder.onstop = () => {
+                    console.log('Recording stopped. Total chunks:', state.recordedChunks.length);
+                    
+                    if (state.recordedChunks.length === 0) {
+                        showToast('No video data recorded');
+                        return;
+                    }
+
                     const blob = new Blob(state.recordedChunks, { type: mimeType });
+                    console.log('Video blob created:', blob.size, 'bytes');
+                    
                     cleanupCurrentVideo();
                     state.currentVideoBlob = blob;
                     state.currentVideoUrl = URL.createObjectURL(blob);
@@ -1128,30 +1131,53 @@
                     showVideoPreview();
                 };
 
-                state.mediaRecorder.start();
+                state.mediaRecorder.onerror = (event) => {
+                    console.error('MediaRecorder error:', event);
+                    showToast('Recording error occurred');
+                    stopRecording();
+                };
+
+                state.mediaRecorder.start(1000);
                 state.isRecording = true;
                 state.recordingStartTime = Date.now();
+
+                console.log('Recording started');
 
                 updateRecordingUI();
                 startRecordingTimer();
 
-                setTimeout(() => {
+                state.recordingTimeoutId = setTimeout(() => {
                     if (state.isRecording) {
+                        console.log('Max recording time reached');
                         stopRecording();
                     }
                 }, CONFIG.maxRecordingTime);
 
             } catch (error) {
                 console.error('Recording start error:', error);
-                showToast('Failed to start recording');
+                showToast('Failed to start recording: ' + error.message);
             }
         }
 
         function stopRecording() {
-            if (!state.isRecording || !state.mediaRecorder) return;
+            console.log('Stop recording called');
+            
+            if (!state.isRecording || !state.mediaRecorder) {
+                console.log('Not recording or no mediaRecorder');
+                return;
+            }
+
+            if (state.recordingTimeoutId) {
+                clearTimeout(state.recordingTimeoutId);
+                state.recordingTimeoutId = null;
+            }
 
             state.isRecording = false;
-            state.mediaRecorder.stop();
+            
+            if (state.mediaRecorder.state !== 'inactive') {
+                state.mediaRecorder.stop();
+            }
+            
             stopRecordingTimer();
             updateRecordingUI();
         }
@@ -1216,44 +1242,6 @@
         }
 
         // ============================================
-        // Video Player Controls
-        // ============================================
-        function toggleVideoPlayback() {
-            if (elements.previewVideo.paused) {
-                elements.previewVideo.play();
-                elements.playIcon.style.display = 'none';
-                elements.pauseIcon.style.display = 'block';
-            } else {
-                elements.previewVideo.pause();
-                elements.playIcon.style.display = 'block';
-                elements.pauseIcon.style.display = 'none';
-            }
-        }
-
-        function updateVideoProgress() {
-            const video = elements.previewVideo;
-            if (video.duration) {
-                const progress = (video.currentTime / video.duration) * 100;
-                elements.videoProgress.style.width = `${progress}%`;
-
-                const currentMin = Math.floor(video.currentTime / 60);
-                const currentSec = Math.floor(video.currentTime % 60);
-                const durationMin = Math.floor(video.duration / 60);
-                const durationSec = Math.floor(video.duration % 60);
-
-                elements.videoTime.textContent = 
-                    `${currentMin}:${String(currentSec).padStart(2, '0')} / ${durationMin}:${String(durationSec).padStart(2, '0')}`;
-            }
-        }
-
-        function seekVideo(event) {
-            const timeline = elements.videoTimeline;
-            const rect = timeline.getBoundingClientRect();
-            const pos = (event.clientX - rect.left) / rect.width;
-            elements.previewVideo.currentTime = pos * elements.previewVideo.duration;
-        }
-
-        // ============================================
         // Download
         // ============================================
         function getFormattedDateTime() {
@@ -1274,17 +1262,26 @@
             const a = document.createElement('a');
             a.href = url;
             a.download = `CameraStudio_Photo_${getFormattedDateTime()}.jpg`;
+            document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
         }
 
         function downloadVideo() {
-            if (!state.currentVideoBlob) return;
+            if (!state.currentVideoBlob) {
+                showToast('No video to download');
+                return;
+            }
 
             const url = state.currentVideoUrl;
             const a = document.createElement('a');
             a.href = url;
             a.download = `CameraStudio_Video_${getFormattedDateTime()}.webm`;
+            document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
+            
+            showToast('Video download started');
         }
 
         // ============================================
@@ -1560,16 +1557,6 @@
         elements.videoDownloadBtn.addEventListener('click', downloadVideo);
         elements.videoSendBtn.addEventListener('click', sendVideoToDrive);
 
-        // Video Player
-        elements.videoPlayBtn.addEventListener('click', toggleVideoPlayback);
-        elements.previewVideo.addEventListener('timeupdate', updateVideoProgress);
-        elements.videoTimeline.addEventListener('click', seekVideo);
-
-        elements.previewVideo.addEventListener('ended', () => {
-            elements.playIcon.style.display = 'block';
-            elements.pauseIcon.style.display = 'none';
-        });
-
         // ============================================
         // Initialization
         // ============================================
@@ -1580,3 +1567,4 @@
     </script>
 </body>
 </html>
+```
